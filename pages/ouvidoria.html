@@ -1,0 +1,39 @@
+<main class="flex-grow pt-32 pb-20 px-6">
+        <div class="container mx-auto max-w-3xl">
+             <div class="text-sm text-gray-500 mb-8 flex items-center uppercase tracking-wider font-semibold">
+                <a href="../index.html" class="hover:text-neon-pink transition">Home</a> <span class="mx-3">/</span> <span class="text-neon-pink">Ouvidoria</span>
+            </div>
+
+            <div class="text-center mb-12">
+                <i class="fas fa-bullhorn text-6xl text-neon-pink mb-6"></i>
+                <h1 class="text-4xl font-black text-white mb-4">Canal de Transparência</h1>
+                <p class="text-gray-400">Seu espaço seguro para denúncias, elogios e sugestões. O anonimato é garantido se desejado.</p>
+            </div>
+
+            <form class="bg-dark-800 p-8 rounded-2xl border border-dark-700">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Tipo de Manifesto</label>
+                        <select class="w-full bg-dark-900 border border-dark-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-neon-pink">
+                            <option>Sugestão</option>
+                            <option>Elogio</option>
+                            <option>Reclamação</option>
+                            <option>Denúncia</option>
+                        </select>
+                    </div>
+                    <div>
+                         <label class="block text-gray-400 text-sm mb-2">Identificação</label>
+                        <select class="w-full bg-dark-900 border border-dark-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-neon-pink">
+                            <option>Quero me identificar</option>
+                            <option>Anônimo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm mb-2">Mensagem</label>
+                    <textarea rows="5" class="w-full bg-dark-900 border border-dark-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-neon-pink"></textarea>
+                </div>
+                <button class="w-full bg-neon-pink text-white font-bold py-4 rounded-lg hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20">Enviar Manifesto</button>
+            </form>
+        </div>
+    </main>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Financeiro | ODIN OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
+    </script>
+    <style>
+        /* Replaced Tailwind @apply utilities with plain CSS using the configured colors */
+        .glass-panel {
+            background-color: rgba(14, 14, 18, 0.6); /* bg-dark-800/60 */
+            backdrop-filter: blur(12px); /* approximate backdrop-blur-xl */
+            border: 1px solid #1A1A23; /* border-dark-700 */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5); /* approximate shadow-lg */
+        }
+        .input-tech {
+            width: 100%;
+            background-color: #050507; /* bg-dark-900 */
+            border: 1px solid #2A2A35; /* border-dark-600 */
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .input-tech:focus {
+            border-color: #00F0FF; /* neon-cyan */
+            box-shadow: 0 0 10px rgba(0,240,255,0.2);
+        }
+        .input-tech::placeholder {
+            color: #9CA3AF; /* placeholder-gray-600 */
+        }
+
+        .tab-active-cyan {
+            background-color: #00F0FF;
+            color: #050507;
+            box-shadow: 0 0 15px rgba(0,240,255,0.4);
+        }
+        .tab-active-violet {
+            background-color: #7000FF;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(112,0,255,0.4);
+        }
+        .tab-active-red {
+            background-color: #FF003C;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255,0,60,0.4);
+        }
+        .tab-active-orange {
+            background-color: #F59E0B;
+            color: #050507;
+            box-shadow: 0 0 15px rgba(245,158,11,0.4);
+        }
+
+        .tab-inactive {
+            background-color: #050507; /* dark-900 */
+            color: #9CA3AF; /* gray-400 */
+            border: 1px solid #2A2A35; /* border-dark-600 */
+        }
+        .tab-inactive:hover {
+            color: #ffffff;
+            border-color: #9CA3AF; /* hover:border-gray-400 */
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 0.5rem; /* h-2 approx */
+            background-color: #1A1A23; /* dark-700 */
+            border-radius: 0.5rem;
+            appearance: none;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 1.5rem; /* w-6 approx */
+            height: 1.5rem;
+            background-color: #00F0FF; /* neon-cyan */
+            border-radius: 9999px;
+            border: 4px solid #050507; /* border-dark-800 */
+            box-shadow: 0 0 10px rgba(0,240,255,0.8);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        body {
+            background-color: #050507; /* dark-900 */
+            color: #D1D5DB; /* gray-300 */
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050507; }
+        ::-webkit-scrollbar-thumb { background: #1A1A23; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="header-placeholder"></div>
+
+    <div class="fixed top-24 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
+        <div class="whitespace-nowrap animate-marquee text-xs font-mono flex gap-12">
+            <span class="text-gray-400">TOTAL HISTÓRICO: <span class="text-neon-green" id="ticker-historical">R$ 0,00</span></span>
+            <span class="text-gray-400">HOJE: <span class="text-neon-cyan" id="ticker-today">R$ 0,00</span></span>
+            <span class="text-gray-400">PENDENTE: <span class="text-neon-red" id="ticker-pending">R$ 0,00</span></span>
+            <span class="text-gray-400">TAXA PIX: <span class="text-neon-cyan">0.00%</span></span>
+        </div>
+    </div>
+
+    <main class="flex-grow pt-40 px-6 container mx-auto pb-20">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 border-b border-dark-700 pb-6">
+            <div>
+                <div class="flex items-center gap-2 text-neon-cyan mb-2 font-mono text-xs tracking-widest uppercase">
+                    <div class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div> Módulo Operacional
+                </div>
+                <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight">
+                    Financeiro <span class="text-dark-700">/</span> Odin
+                </h1>
+            </div>
+            
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-white underline mr-4 mb-2">Resetar Sistema</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-white font-bold flex items-center"><i class="fas fa-chart-bar text-neon-violet mr-2"></i> Histórico Diário</h3>
+                        <span class="text-xs text-gray-500 font-mono" id="chart-date-range">Carregando...</span>
+                    </div>
+                    <div class="h-64 w-full">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border-l-4 border-neon-cyan">
+                    <h4 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider flex justify-between">
+                        <span><i class="fas fa-pen mr-2"></i>Registro Diário (Hoje)</span>
+                        <span id="edit-mode-indicator" class="hidden text-neon-cyan animate-pulse">EDITANDO</span>
+                    </h4>
+                    <input type="hidden" id="edit-index" value="-1">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-5">
+                            <input type="text" id="input-name" placeholder="Nome do Cliente" class="input-tech">
+                        </div>
+                        <div class="md:col-span-3">
+                            <input type="text" id="input-value" placeholder="R$ 0,00" class="input-tech">
+                        </div>
+                        <div class="md:col-span-2">
+                            <select id="input-status" class="input-tech cursor-pointer">
+                                <option value="pendente" class="text-red-400">Pendente</option>
+                                <option value="pago" class="text-green-400">Pago</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <button onclick="saveDebt()" id="btn-save" class="w-full h-full bg-neon-cyan text-dark-900 font-bold rounded hover:bg-white transition shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+                                <i class="fas fa-plus mr-1"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl overflow-hidden flex flex-col min-h-[300px]">
+                    <div class="p-4 border-b border-dark-700 bg-dark-800/80 flex justify-between items-center">
+                        <h3 class="text-white font-bold text-sm">Movimentação Atual</h3>
+                        <span id="rowCount" class="text-xs bg-dark-900 text-gray-400 px-2 py-1 rounded font-mono">0 Registros</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-dark-800/50 border-b border-dark-700">
+                                <tr>
+                                    <th class="px-6 py-3">Cliente</th>
+                                    <th class="px-6 py-3">Valor</th>
+                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="debtTableBody" class="divide-y divide-dark-700"></tbody>
+                        </table>
+                        <div id="empty-state" class="flex flex-col items-center justify-center py-12 text-gray-600">
+                            <i class="fas fa-folder-open text-4xl mb-3 opacity-50"></i>
+                            <p>Nenhum registro hoje.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div id="sim-panel" class="glass-panel rounded-xl border-t-4 border-t-neon-cyan sticky top-36">
+                    
+                    <div class="grid grid-cols-4 p-2 gap-1 bg-dark-800/50 border-b border-dark-700">
+                        <button onclick="switchTab('pix')" id="tab-pix" class="py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-active-cyan">PIX</button>
+                        <button onclick="switchTab('boleto')" id="tab-boleto" class="py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive">BOLETO</button>
+                        <button onclick="switchTab('multa')" id="tab-multa" class="py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive">MULTA</button>
+                        <button onclick="switchTab('scripts')" id="tab-scripts" class="py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive"><i class="fas fa-comment-dots"></i></button>
+                    </div>
+
+                    <div id="content-pix" class="p-6 space-y-5">
+                        <div><label class="text-xs text-gray-500 block mb-1 uppercase">Valor</label><input type="text" id="pix-total" placeholder="R$ 0,00" class="input-tech text-neon-cyan font-bold"></div>
+                        <div>
+                            <div class="flex justify-between mb-2"><label class="text-xs text-gray-500 uppercase">Desconto</label><span id="pix-percent-display" class="text-neon-cyan font-bold">10%</span></div>
+                            <input type="range" id="pix-slider" min="5" max="30" value="10" step="1">
+                        </div>
+                        <div id="pix-result" class="hidden bg-dark-900 p-4 rounded-lg border border-dark-600 flex justify-between items-center">
+                            <span class="text-sm font-bold text-white">Final:</span><span class="text-2xl font-bold text-neon-cyan font-mono" id="pix-val-final">R$ 0,00</span>
+                            <span class="hidden" id="pix-val-original-hidden"></span>
+                        </div>
+                        <button onclick="copyPixProposal()" class="w-full bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/50 py-3 rounded font-bold hover:bg-neon-cyan hover:text-dark-900 transition uppercase text-sm flex justify-center items-center gap-2"><i class="fab fa-whatsapp"></i> Copiar</button>
+                    </div>
+
+                    <div id="content-boleto" class="p-6 space-y-5 hidden">
+                        <div><label class="text-xs text-gray-500 block mb-1 uppercase">Valor</label><input type="text" id="boleto-total" placeholder="R$ 0,00" class="input-tech text-neon-violet font-bold"></div>
+                        <div><label class="text-xs text-gray-500 block mb-1 uppercase">Parcelas</label><select id="boleto-parcelas" class="input-tech cursor-pointer"></select></div>
+                        <div id="boleto-result" class="hidden bg-dark-900 p-4 rounded-lg border border-dark-600 space-y-2 text-sm">
+                            <div class="flex justify-between"><span class="text-gray-400">Entrada:</span><span class="text-white font-bold" id="boleto-val-entrada">R$ 0,00</span></div>
+                            <div class="flex justify-between items-center"><span class="text-neon-violet font-bold" id="boleto-qtd-parcelas">0x</span><span class="text-xl font-bold text-neon-violet" id="boleto-val-parcela">R$ 0,00</span></div>
+                        </div>
+                        <button onclick="copyBoletoProposal()" class="w-full bg-neon-violet/10 text-neon-violet border border-neon-violet/50 py-3 rounded font-bold hover:bg-neon-violet hover:text-white transition uppercase text-sm flex justify-center items-center gap-2"><i class="fas fa-copy"></i> Copiar</button>
+                    </div>
+
+                    <div id="content-multa" class="p-6 space-y-5 hidden">
+                        <div><label class="text-xs text-gray-500 block mb-1 uppercase">Mensalidade</label><input type="text" id="multa-mensalidade" placeholder="R$ 0,00" class="input-tech text-neon-red font-bold"></div>
+                        <div><label class="text-xs text-gray-500 block mb-1 uppercase">Adicional</label><input type="text" id="multa-adicional" placeholder="R$ 0,00" class="input-tech text-white"></div>
+                        <div id="multa-result" class="hidden bg-dark-900 p-4 rounded-lg border border-neon-red/30 space-y-2 font-mono text-xs">
+                            <div class="flex justify-between"><span class="text-gray-400">Base (6x):</span><span class="text-gray-300" id="multa-base">R$ 0,00</span></div>
+                            <div class="flex justify-between text-neon-red"><span>Multa (10%):</span><span class="font-bold" id="multa-valor">R$ 0,00</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Adicional:</span><span class="text-gray-300" id="multa-extra">R$ 0,00</span></div>
+                            <div class="h-px bg-dark-700 my-2"></div>
+                            <div class="flex justify-between items-center text-sm"><span class="text-white font-bold">TOTAL:</span><span class="text-xl font-bold text-neon-red" id="multa-total">R$ 0,00</span></div>
+                        </div>
+                        <button onclick="copyMultaProposal()" class="w-full bg-neon-red/10 text-neon-red border border-neon-red/50 py-3 rounded font-bold hover:bg-neon-red hover:text-white transition shadow-[0_0_15px_rgba(255,0,60,0.2)] uppercase text-sm flex justify-center items-center gap-2"><i class="fas fa-file-contract"></i> Copiar</button>
+                    </div>
+
+                    <div id="content-scripts" class="p-6 space-y-4 hidden">
+                        <h4 class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2">Abordagem Inicial</h4>
+                        <button onclick="copyScript('ola')" class="w-full text-left bg-dark-900 border border-dark-600 p-3 rounded hover:border-neon-orange hover:text-neon-orange transition text-sm group">
+                            <div class="font-bold text-white group-hover:text-neon-orange">👋 Olá / Apresentação</div>
+                            <div class="text-[10px] text-gray-500 mt-1">Saudação padrão + Identificação</div>
+                        </button>
+                        
+                        <h4 class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-2 mt-4">Cobrança</h4>
+                        <button onclick="copyScript('preventiva')" class="w-full text-left bg-dark-900 border border-dark-600 p-3 rounded hover:border-neon-orange hover:text-neon-orange transition text-sm group">
+                            <div class="font-bold text-white group-hover:text-neon-orange">📅 Preventiva</div>
+                            <div class="text-[10px] text-gray-500 mt-1">Lembrete antes do vencimento</div>
+                        </button>
+                        <button onclick="copyScript('atraso')" class="w-full text-left bg-dark-900 border border-dark-600 p-3 rounded hover:border-neon-orange hover:text-neon-orange transition text-sm group">
+                            <div class="font-bold text-white group-hover:text-neon-orange">⚠️ Atraso Recente</div>
+                            <div class="text-[10px] text-gray-500 mt-1">Cobrança amigável pós-vencimento</div>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
+    <div id="footer-placeholder"></div>
+    <script src="../assets/js/main.js"></script>
+    
+    <script>
+        let debtsData = []; 
+        let chartHistory = [];
+        const LS_KEY_DEBTS = 'ODIN_DEBTS';
+        const LS_KEY_CHART = 'ODIN_CHART_HISTORY';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromStorage(); checkNewDay(); initChart(); updateUI(); initCalculators();
+            addCurrencyMask(document.getElementById('input-value'));
+            ['pix-total', 'boleto-total', 'multa-mensalidade', 'multa-adicional'].forEach(id => addCurrencyMask(document.getElementById(id)));
+            const select = document.getElementById('boleto-parcelas');
+            for(let i=1; i<=10; i++) { const opt = document.createElement('option'); opt.value = i; opt.text = `${i}x (Boleto)`; select.appendChild(opt); }
+        });
+
+        // --- PERSISTÊNCIA ---
+        function loadDataFromStorage() {
+            const d = localStorage.getItem(LS_KEY_DEBTS); if(d) debtsData = JSON.parse(d);
+            const h = localStorage.getItem(LS_KEY_CHART); if(h) chartHistory = JSON.parse(h); else chartHistory = [];
+        }
+        function getTodayString() { return new Date().toLocaleDateString('pt-BR'); }
+        function checkNewDay() {
+            const t = getTodayString();
+            if(chartHistory.length===0) chartHistory.push({date:t, value:0});
+            else if(chartHistory[chartHistory.length-1].date !== t) { chartHistory.push({date:t, value:0}); if(chartHistory.length>7) chartHistory.shift(); }
+            saveDataToStorage();
+        }
+        function saveDataToStorage() { localStorage.setItem(LS_KEY_DEBTS, JSON.stringify(debtsData)); localStorage.setItem(LS_KEY_CHART, JSON.stringify(chartHistory)); }
+
+        // --- CRUD ---
+        function saveDebt() {
+            const name = document.getElementById('input-name').value.trim();
+            const val = parseCurrency(document.getElementById('input-value').value);
+            const status = document.getElementById('input-status').value;
+            const idx = document.getElementById('edit-index').value;
+            if(!name || val<=0) { showToast('Erro nos dados', 'error'); return; }
+            const rec = {id:'#'+Math.floor(Math.random()*9000+1000), name, debt:val, status};
+            if(idx==="-1") { debtsData.push(rec); showToast('Salvo', 'success'); }
+            else { rec.id = debtsData[idx].id; debtsData[idx] = rec; showToast('Atualizado', 'success'); exitEditMode(); }
+            document.getElementById('input-name').value=''; document.getElementById('input-value').value=''; 
+            updateUI();
+        }
+        function editDebt(i) {
+            const r = debtsData[i];
+            document.getElementById('input-name').value = r.name;
+            document.getElementById('input-value').value = formatCurrency(r.debt);
+            document.getElementById('input-status').value = r.status;
+            document.getElementById('edit-index').value = i;
+            document.getElementById('edit-mode-indicator').classList.remove('hidden');
+            document.getElementById('btn-save').classList.replace('bg-neon-cyan','bg-neon-violet');
+        }
+        function deleteDebt(i) { if(confirm('Apagar?')) { debtsData.splice(i,1); updateUI(); showToast('Apagado','info'); } }
+        function exitEditMode() {
+            document.getElementById('edit-index').value = "-1";
+            document.getElementById('edit-mode-indicator').classList.add('hidden');
+            document.getElementById('btn-save').classList.replace('bg-neon-violet','bg-neon-cyan');
+            document.getElementById('input-name').value=''; document.getElementById('input-value').value='';
+        }
+        function clearAllData() { if(confirm('Resetar tudo?')) { debtsData=[]; chartHistory=[{date:getTodayString(), value:0}]; updateUI(); showToast('Resetado','error'); } }
+
+        // --- UI ---
+        function updateUI() {
+            const tbody = document.getElementById('debtTableBody'); tbody.innerHTML = '';
+            let todayRec=0, pending=0;
+            if(debtsData.length===0) document.getElementById('empty-state').classList.remove('hidden');
+            else {
+                document.getElementById('empty-state').classList.add('hidden');
+                debtsData.forEach((r,i) => {
+                    if(r.status==='pago') todayRec+=r.debt; else pending+=r.debt;
+                    const style = r.status==='pago'?'text-neon-green border-neon-green/30 bg-neon-green/10':'text-neon-red border-neon-red/30 bg-neon-red/10';
+                    tbody.innerHTML += `<tr class="hover:bg-dark-700/50 border-b border-dark-700"><td class="px-6 py-4 font-bold text-white">${r.name}</td><td class="px-6 py-4 font-mono text-gray-300">${formatCurrency(r.debt)}</td><td class="px-6 py-4"><span class="text-xs font-bold px-2 py-1 rounded uppercase border ${style}">${r.status}</span></td><td class="px-6 py-4 text-right"><button onclick="loadToCalc(${r.debt})" class="mr-2 hover:text-neon-cyan"><i class="fas fa-calculator"></i></button><button onclick="editDebt(${i})" class="mr-2 hover:text-neon-violet"><i class="fas fa-pen"></i></button><button onclick="deleteDebt(${i})" class="hover:text-neon-red"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+            }
+            const todayIdx = chartHistory.findIndex(d=>d.date===getTodayString());
+            if(todayIdx!==-1) chartHistory[todayIdx].value = todayRec; else chartHistory.push({date:getTodayString(), value:todayRec});
+            saveDataToStorage();
+            document.getElementById('rowCount').innerText = debtsData.length + ' Reg';
+            document.getElementById('ticker-today').innerText = formatCurrency(todayRec);
+            document.getElementById('ticker-pending').innerText = formatCurrency(pending);
+            document.getElementById('ticker-historical').innerText = formatCurrency(chartHistory.reduce((a,b)=>a+b.value,0));
+            renderChart();
+        }
+
+        let myChart;
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            const grad = ctx.createLinearGradient(0,0,0,400); grad.addColorStop(0,'rgba(0,255,148,0.8)'); grad.addColorStop(1,'rgba(0,255,148,0.1)');
+            myChart = new Chart(ctx, {
+                type: 'bar', data: {labels:[], datasets:[{label:'R$', data:[], backgroundColor:grad, borderColor:'#00FF94', borderWidth:1, borderRadius:4}]},
+                options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#6B7280'}}, y:{grid:{color:'#1A1A23'},ticks:{color:'#6B7280'}}}}
+            });
+        }
+        function renderChart() { if(!myChart) return; myChart.data.labels = chartHistory.map(h=>h.date.slice(0,5)); myChart.data.datasets[0].data = chartHistory.map(h=>h.value); myChart.update(); if(chartHistory.length) document.getElementById('chart-date-range').innerText = `${chartHistory[0].date} - ${chartHistory[chartHistory.length-1].date}`; }
+
+        // --- SIMULADOR ---
+        function switchTab(t) {
+            ['pix','boleto','multa','scripts'].forEach(x => {
+                document.getElementById(`content-${x}`).classList.add('hidden');
+                document.getElementById(`tab-${x}`).className = 'py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive';
+            });
+            document.getElementById(`content-${t}`).classList.remove('hidden');
+            const panel = document.getElementById('sim-panel');
+            const colors = {pix:'neon-cyan', boleto:'neon-violet', multa:'neon-red', scripts:'neon-orange'};
+            document.getElementById(`tab-${t}`).className = `py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-active-${t==='scripts'?'orange':(t==='pix'?'cyan':(t==='boleto'?'violet':'red'))}`;
+            panel.className = `glass-panel rounded-xl border-t-4 border-t-${colors[t]} sticky top-36`;
+        }
+
+        function initCalculators() {
+            ['pix-total','boleto-total','multa-mensalidade','multa-adicional'].forEach(id => document.getElementById(id).addEventListener('input', ()=>{ if(id.includes('pix')) calcPix(); if(id.includes('boleto')) calcBoleto(); if(id.includes('multa')) calcMulta(); }));
+            document.getElementById('pix-slider').addEventListener('input', calcPix);
+            document.getElementById('boleto-parcelas').addEventListener('change', calcBoleto);
+        }
+
+        // --- CÁLCULOS ---
+        function calcPix() {
+            const t = parseCurrency(document.getElementById('pix-total').value);
+            const p = document.getElementById('pix-slider').value;
+            document.getElementById('pix-percent-display').innerText = `${p}%`;
+            if(t>0) {
+                const f = t * (1 - p/100);
+                document.getElementById('pix-val-final').innerText = formatCurrency(f);
+                document.getElementById('pix-val-original-hidden').innerText = formatCurrency(t); 
+                document.getElementById('pix-result').classList.remove('hidden');
+            } else document.getElementById('pix-result').classList.add('hidden');
+        }
+
+        function calcBoleto() {
+            const t = parseCurrency(document.getElementById('boleto-total').value);
+            const p = parseInt(document.getElementById('boleto-parcelas').value);
+            if(t>0) {
+                const ep = p<=6 ? 0.30 : 0.25;
+                document.getElementById('boleto-val-entrada').innerText = formatCurrency(t*ep);
+                document.getElementById('boleto-qtd-parcelas').innerText = `${p}x`;
+                document.getElementById('boleto-val-parcela').innerText = formatCurrency((t - (t*ep))/p);
+                document.getElementById('boleto-result').classList.remove('hidden');
+            } else document.getElementById('boleto-result').classList.add('hidden');
+        }
+
+        function calcMulta() {
+            const m = parseCurrency(document.getElementById('multa-mensalidade').value);
+            const a = parseCurrency(document.getElementById('multa-adicional').value);
+            if(m>0) {
+                const s = m*6; const mu = s*0.10;
+                document.getElementById('multa-base').innerText = formatCurrency(s);
+                document.getElementById('multa-valor').innerText = formatCurrency(mu);
+                document.getElementById('multa-extra').innerText = formatCurrency(a);
+                document.getElementById('multa-total').innerText = formatCurrency(mu+a);
+                document.getElementById('multa-result').classList.remove('hidden');
+            } else document.getElementById('multa-result').classList.add('hidden');
+        }
+
+        // --- CÓPIA (TEXTOS EXATOS) ---
+        function copyPixProposal() {
+            const totalText = document.getElementById('pix-val-original-hidden').innerText || formatCurrency(parseCurrency(document.getElementById('pix-total').value));
+            const finalText = document.getElementById('pix-val-final').innerText;
+            const percentText = document.getElementById('pix-percent-display').innerText;
+            const texto = `💰 *PROPOSTA ESPECIAL PARA PAGAMENTO À VISTA!*\n\nValor original: ~${totalText}~\n*Valor com ${percentText} de desconto: ${finalText}* ✨\n\nEsta condição é válida para pagamento via PIX ou cartão de crédito, sendo que, pagando com cartão, incidirão as taxas correspondentes.`;
+            navigator.clipboard.writeText(texto).then(() => showToast('Proposta PIX Copiada!', 'success'));
+        }
+
+        function copyBoletoProposal() {
+            const entrada = document.getElementById('boleto-val-entrada').innerText;
+            const parcelas = document.getElementById('boleto-qtd-parcelas').innerText;
+            const valorParc = document.getElementById('boleto-val-parcela').innerText;
+            const texto = `🧾 *ORÇAMENTO PARA PARCELAMENTO NO BOLETO*\n\n*Valor da Entrada:* ${entrada}\n*Restante em ${parcelas} de:* ${valorParc}\n\nPosso gerar os boletos para pagamento hoje?`;
+            navigator.clipboard.writeText(texto).then(() => showToast('Orçamento Boleto Copiado!', 'success'));
+        }
+
+        function copyMultaProposal() {
+            const sem = document.getElementById('multa-base').innerText;
+            const mul = document.getElementById('multa-valor').innerText;
+            const add = document.getElementById('multa-extra').innerText;
+            const tot = document.getElementById('multa-total').innerText;
+            const texto = `*Detalhamento - Multa Contratual e Débitos*\n\n📊 Valor Base Semestral (6x Mensalidade): ${sem}\n⚖️ Multa Contratual (10% do Semestre): ${mul}\n🗓️ Valores Adicionais em Atraso: ${add}\n-----------------------------------\n💰 *TOTAL A PAGAR:* ${tot}\n\nEste cálculo considera a multa contratual padrão e os valores em atraso informados. Caso tenha alguma dúvida estamos à disposição.`;
+            navigator.clipboard.writeText(texto).then(() => showToast('Rescisão Copiada!', 'success'));
+        }
+
+        function copyScript(type) {
+            let text = "";
+            if(type === 'ola') text = "Olá! Me chamo XXXXXX e faço parte do setor financeiro. Como posso ajudar você hoje?";
+            if(type === 'preventiva') text = "Olá! Passando para lembrar que o vencimento da sua mensalidade é amanhã. O pagamento antecipado garante seu desconto!";
+            if(type === 'atraso') text = "Olá! Notamos uma pendência financeira em seu cadastro. Podemos verificar uma condição especial para regularização hoje?";
+            navigator.clipboard.writeText(text).then(() => showToast('Script Copiado!', 'success'));
+        }
+
+        // Helpers
+        function addCurrencyMask(i) { i.addEventListener('input', (e)=>{ let v = e.target.value.replace(/\D/g,''); if(v){v=(parseInt(v,10)/100).toFixed(2);e.target.value=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);}else e.target.value=''; }); }
+        function parseCurrency(v) { if(!v)return 0; return parseFloat(v.replace(/\D/g,''))/100 || 0; }
+        function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
+        function loadToCalc(v) { switchTab('pix'); const fs=v.toFixed(2); const f=`R$ ${new Intl.NumberFormat('pt-BR').format(fs)}`; document.getElementById('pix-total').value=f; document.getElementById('boleto-total').value=f; calcPix(); showToast('Carregado', 'info'); }
+        function showToast(msg,type='info'){const t=document.createElement('div'); const c=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-cyan text-neon-cyan'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${c} text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transform translate-x-full transition-all duration-300 min-w-[200px]`; t.innerHTML=`<i class="fas ${type==='success'?'fa-check':'fa-info'}"></i><span class="text-sm font-bold">${msg}</span>`; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.classList.remove('translate-x-full'),10); setTimeout(()=>{t.classList.add('translate-x-full','opacity-0');setTimeout(()=>t.remove(),300)},3000); }
+    </script>
+</body>
+</html>

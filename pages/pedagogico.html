@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedagógico | INSTITUTO YE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], }, colors: { dark: { 900: '#0A0A0F', 800: '#13131A', 700: '#1C1C26', }, neon: { blue: '#00F0FF', purple: '#BD00FF', pink: '#FF00A8', } }, boxShadow: { 'neon-purple': '0 0 20px -5px rgba(189, 0, 255, 0.5)', } } } }
+    </script>
+    <style>
+    /* Plain CSS equivalents for Tailwind @apply utilities to avoid unknown at-rule errors */
+    :root {
+        --dark-900: #0A0A0F;
+        --dark-700: #1C1C26;
+        --neon-purple: #BD00FF;
+        --neon-pink: #FF00A8;
+    }
+
+    .text-gradient {
+        background-image: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .tech-border {
+        border: 1px solid var(--dark-700);
+        transition: border-color 300ms;
+    }
+
+    .tech-border:hover {
+        border-color: rgba(189, 0, 255, 0.5);
+    }
+
+    body {
+        background-color: var(--dark-900);
+        color: #E5E7EB; /* approximate Tailwind text-gray-200 */
+    }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow pt-32 pb-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-sm text-gray-500 mb-8 flex items-center uppercase tracking-wider font-semibold">
+                <a href="../index.html" class="hover:text-neon-purple transition">Home</a> <span class="mx-3">/</span> <span class="text-neon-purple">Pedagógico</span>
+            </div>
+
+            <div class="mb-12 flex flex-col md:flex-row justify-between items-end border-b border-dark-700 pb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-black mb-2 text-white flex items-center">
+                        <i class="fas fa-brain text-neon-purple mr-4"></i> Portal Acadêmico
+                    </h1>
+                    <p class="text-gray-400 text-lg ml-14">Evolução cognitiva e desempenho.</p>
+                </div>
+                <div class="mt-6 md:mt-0">
+                    <span class="text-gray-400 text-sm">Média Geral do Semestre:</span>
+                    <div class="text-4xl font-bold text-neon-purple text-right">8.9</div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <h2 class="text-2xl font-bold text-white mb-4">Cronograma Hoje</h2>
+                    
+                    <div class="relative pl-8 border-l-2 border-dark-700 space-y-8">
+                        <div class="relative group">
+                            <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(189,0,255,0.8)]"></div>
+                            <div class="bg-dark-800 p-6 rounded-xl tech-border">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-neon-purple font-bold text-sm">19:00 - 20:40</span>
+                                    <span class="text-gray-500 text-xs uppercase">Lab 04</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-white">Arquitetura de Software</h3>
+                                <p class="text-gray-400 text-sm mb-4">Prof. Ye | Tópico: Microserviços e Containers</p>
+                                <button class="text-xs bg-neon-purple/10 text-neon-purple px-3 py-2 rounded hover:bg-neon-purple hover:text-white transition">Acessar Material</button>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-dark-700 border-2 border-gray-500"></div>
+                            <div class="bg-dark-800 p-6 rounded-xl tech-border opacity-70 hover:opacity-100 transition">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-400 font-bold text-sm">20:50 - 22:30</span>
+                                    <span class="text-gray-500 text-xs uppercase">Sala 302</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-white">User Experience (UX)</h3>
+                                <p class="text-gray-400 text-sm">Prof. Raphael | Tópico: Heurísticas de Nielsen</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                     <a href="#" class="block group bg-dark-800 p-6 rounded-xl tech-border hover:bg-dark-800/80">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-300 group-hover:text-white">Boletim Detalhado</h4>
+                            <i class="fas fa-chevron-right text-gray-600 group-hover:text-neon-purple"></i>
+                        </div>
+                        <div class="w-full bg-dark-700 rounded-full h-2 mb-1">
+                            <div class="bg-neon-purple h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 text-right">85% do curso concluído</p>
+                     </a>
+
+                     <a href="#" class="block group bg-dark-800 p-6 rounded-xl tech-border hover:bg-dark-800/80">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-gray-300 group-hover:text-white">Faltas e Presença</h4>
+                            <i class="fas fa-calendar-check text-gray-600 group-hover:text-neon-purple"></i>
+                        </div>
+                     </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
