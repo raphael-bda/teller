@@ -2,123 +2,320 @@
 <html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedagógico | INSTITUTO YE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <title>Pedagógico | ODIN OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], }, colors: { dark: { 900: '#0A0A0F', 800: '#13131A', 700: '#1C1C26', }, neon: { blue: '#00F0FF', purple: '#BD00FF', pink: '#FF00A8', } }, boxShadow: { 'neon-purple': '0 0 20px -5px rgba(189, 0, 255, 0.5)', } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
     <style>
-    /* Plain CSS equivalents for Tailwind @apply utilities to avoid unknown at-rule errors */
-    :root {
-        --dark-900: #0A0A0F;
-        --dark-700: #1C1C26;
-        --neon-purple: #BD00FF;
-        --neon-pink: #FF00A8;
-    }
+        /* Converted Tailwind @apply utilities to plain CSS to avoid Unknown at rule @apply */
+        .glass-panel {
+            background-color: rgba(14, 14, 18, 0.6); /* dark-800/60 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #1A1A23; /* dark-700 */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+        }
+        .input-tech {
+            width: 100%;
+            background-color: #050507; /* dark-900 */
+            border: 1px solid #2A2A35; /* dark-600 */
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-family: "JetBrains Mono", monospace;
+            outline: none;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        .input-tech::placeholder { color: #9CA3AF; } /* placeholder-gray-600 */
+        .input-tech:focus {
+            border-color: #FF0080; /* neon-pink */
+            box-shadow: 0 0 10px rgba(255,0,128,0.2);
+        }
 
-    .text-gradient {
-        background-image: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-    }
+        /* Customização do FullCalendar para Tema Dark */
+        .fc { font-family: 'Inter', sans-serif; color: #D1D5DB; } /* text-gray-300 */
+        .fc-toolbar-title { color: #fff !important; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.875rem; font-weight: 700 !important; }
+        .fc-button {
+            background-color: #1A1A23; /* dark-700 */
+            border: 1px solid #2A2A35; /* dark-600 */
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .fc-button:hover { background-color: #FF0080; border-color: #FF0080; color: #fff; transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
+        .fc-button-active { background-color: #FF0080 !important; border-color: #FF0080 !important; color: #fff !important; }
+        .fc-daygrid-day:hover { background-color: rgba(255,255,255,0.05); cursor: pointer; transition: background-color 0.15s; }
+        .fc-col-header-cell { background-color: #050507; border: 1px solid #1A1A23; color: #6B7280; text-transform: uppercase; font-size: 10px; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .fc-daygrid-day-number { font-size: 0.75rem; font-family: "JetBrains Mono", monospace; color: #9CA3AF; }
+        .fc-event { border-radius: 0.25rem; border: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.4); font-size: 10px; text-transform: uppercase; font-weight: 700; padding-left: 0.25rem; padding-right: 0.25rem; cursor: pointer; transition: transform 0.15s; }
+        .fc-event:hover { transform: scale(1.05); }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: #1A1A23; }
+        .fc-day-today { background-color: rgba(255,0,128,0.05) !important; }
+        .fc-multimonth-title { color: #fff !important; font-weight: 700; text-transform: uppercase; font-size: 0.75rem !important; }
 
-    .tech-border {
-        border: 1px solid var(--dark-700);
-        transition: border-color 300ms;
-    }
-
-    .tech-border:hover {
-        border-color: rgba(189, 0, 255, 0.5);
-    }
-
-    body {
-        background-color: var(--dark-900);
-        color: #E5E7EB; /* approximate Tailwind text-gray-200 */
-    }
+        body { background-color: #050507; color: #D1D5DB; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050507; }
+        ::-webkit-scrollbar-thumb { background: #1A1A23; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF0080; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
+    
     <div id="header-placeholder"></div>
 
-    <main class="flex-grow pt-32 pb-20 px-6">
-        <div class="container mx-auto">
-            <div class="text-sm text-gray-500 mb-8 flex items-center uppercase tracking-wider font-semibold">
-                <a href="../index.html" class="hover:text-neon-purple transition">Home</a> <span class="mx-3">/</span> <span class="text-neon-purple">Pedagógico</span>
+    <div class="fixed top-24 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
+        <div class="whitespace-nowrap animate-marquee text-xs font-mono flex gap-12" id="dynamic-ticker">
+            <span class="text-gray-400">SUPORTE HOJE: <span class="text-neon-pink">NÃO AGENDADO</span></span>
+            <span class="text-gray-400">PRÓXIMO EVENTO: <span class="text-neon-cyan">NENHUM</span></span>
+            <span class="text-gray-400">TOTAL NO MÊS: <span class="text-white">0</span></span>
+            <span class="text-gray-400">STATUS: <span class="text-neon-green">SISTEMA OPERANTE</span></span>
+        </div>
+    </div>
+
+    <main class="flex-grow pt-40 px-6 container mx-auto pb-20">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4 border-b border-dark-700 pb-6">
+            <div>
+                <div class="flex items-center gap-2 text-neon-pink mb-2 font-mono text-xs tracking-widest uppercase">
+                    <div class="w-2 h-2 bg-neon-pink rounded-full animate-pulse"></div> Agenda & Suporte
+                </div>
+                <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight">
+                    Pedagógico <span class="text-dark-700">/</span> Odin
+                </h1>
+            </div>
+            
+            <div class="flex gap-3">
+                <a href="https://www.ircsystem.com.br/w2/index.php" target="_blank" class="bg-dark-800 border border-dark-600 text-white py-2 px-4 rounded hover:border-neon-pink transition text-xs uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-external-link-alt"></i> Acessar IRC
+                </a>
+                <button onclick="openEventModal()" class="bg-neon-pink text-white font-bold py-2 px-4 rounded hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-calendar-plus"></i> Novo Agendamento
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            
+            <div class="lg:col-span-9">
+                <div class="glass-panel p-4 rounded-xl h-[700px]">
+                    <div id='calendar' class="h-full"></div>
+                </div>
             </div>
 
-            <div class="mb-12 flex flex-col md:flex-row justify-between items-end border-b border-dark-700 pb-8">
-                <div>
-                    <h1 class="text-4xl md:text-5xl font-black mb-2 text-white flex items-center">
-                        <i class="fas fa-brain text-neon-purple mr-4"></i> Portal Acadêmico
-                    </h1>
-                    <p class="text-gray-400 text-lg ml-14">Evolução cognitiva e desempenho.</p>
-                </div>
-                <div class="mt-6 md:mt-0">
-                    <span class="text-gray-400 text-sm">Média Geral do Semestre:</span>
-                    <div class="text-4xl font-bold text-neon-purple text-right">8.9</div>
-                </div>
-            </div>
-
-            <div class="grid lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-6">
-                    <h2 class="text-2xl font-bold text-white mb-4">Cronograma Hoje</h2>
-                    
-                    <div class="relative pl-8 border-l-2 border-dark-700 space-y-8">
-                        <div class="relative group">
-                            <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-neon-purple shadow-[0_0_10px_rgba(189,0,255,0.8)]"></div>
-                            <div class="bg-dark-800 p-6 rounded-xl tech-border">
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-neon-purple font-bold text-sm">19:00 - 20:40</span>
-                                    <span class="text-gray-500 text-xs uppercase">Lab 04</span>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">Arquitetura de Software</h3>
-                                <p class="text-gray-400 text-sm mb-4">Prof. Ye | Tópico: Microserviços e Containers</p>
-                                <button class="text-xs bg-neon-purple/10 text-neon-purple px-3 py-2 rounded hover:bg-neon-purple hover:text-white transition">Acessar Material</button>
-                            </div>
-                        </div>
-                        <div class="relative group">
-                            <div class="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-dark-700 border-2 border-gray-500"></div>
-                            <div class="bg-dark-800 p-6 rounded-xl tech-border opacity-70 hover:opacity-100 transition">
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-gray-400 font-bold text-sm">20:50 - 22:30</span>
-                                    <span class="text-gray-500 text-xs uppercase">Sala 302</span>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">User Experience (UX)</h3>
-                                <p class="text-gray-400 text-sm">Prof. Raphael | Tópico: Heurísticas de Nielsen</p>
-                            </div>
-                        </div>
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-panel rounded-xl overflow-hidden flex flex-col h-[400px]">
+                    <div class="p-4 border-b border-dark-700 bg-dark-800/80 flex justify-between items-center">
+                        <h3 class="text-white font-bold text-sm flex items-center"><i class="far fa-clock mr-2 text-neon-cyan"></i> Na Fila</h3>
+                    </div>
+                    <div class="overflow-y-auto custom-scroll p-4 space-y-2" id="upcoming-list">
+                        <p class="text-xs text-gray-500 text-center mt-4">Nenhum evento futuro.</p>
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                     <a href="#" class="block group bg-dark-800 p-6 rounded-xl tech-border hover:bg-dark-800/80">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-bold text-gray-300 group-hover:text-white">Boletim Detalhado</h4>
-                            <i class="fas fa-chevron-right text-gray-600 group-hover:text-neon-purple"></i>
-                        </div>
-                        <div class="w-full bg-dark-700 rounded-full h-2 mb-1">
-                            <div class="bg-neon-purple h-2 rounded-full" style="width: 85%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 text-right">85% do curso concluído</p>
-                     </a>
-
-                     <a href="#" class="block group bg-dark-800 p-6 rounded-xl tech-border hover:bg-dark-800/80">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-gray-300 group-hover:text-white">Faltas e Presença</h4>
-                            <i class="fas fa-calendar-check text-gray-600 group-hover:text-neon-purple"></i>
-                        </div>
-                     </a>
+                <div class="glass-panel p-4 rounded-xl">
+                    <h4 class="text-[10px] text-gray-500 uppercase font-bold mb-3">Categorias</h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-xs text-gray-300"><div class="w-3 h-3 rounded-full bg-neon-pink"></div> Suporte Técnico</div>
+                        <div class="flex items-center gap-2 text-xs text-gray-300"><div class="w-3 h-3 rounded-full bg-neon-cyan"></div> Reunião / Conselho</div>
+                        <div class="flex items-center gap-2 text-xs text-gray-300"><div class="w-3 h-3 rounded-full bg-neon-green"></div> Fechamento de Notas</div>
+                        <div class="flex items-center gap-2 text-xs text-gray-300"><div class="w-3 h-3 rounded-full bg-neon-orange"></div> Evento / Feriado</div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <div id="event-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-xl w-full max-w-sm border border-dark-600 relative animate-[fadeIn_0.3s]">
+            <button onclick="closeEventModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            <h3 class="text-lg font-bold text-white mb-6" id="modal-title">Agendar</h3>
+            <input type="hidden" id="evt-id">
+            <div class="space-y-4">
+                <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Título</label><input type="text" id="evt-title" class="input-tech" placeholder="Ex: Suporte"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Data</label><input type="date" id="evt-date" class="input-tech"></div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Cor</label>
+                        <select id="evt-color" class="input-tech cursor-pointer">
+                            <option value="#FF0080">Suporte</option>
+                            <option value="#00F0FF">Reunião</option>
+                            <option value="#00FF94">Notas</option>
+                            <option value="#F59E0B">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4 pt-2 border-t border-dark-700">
+                    <button onclick="saveEvent()" class="flex-1 bg-neon-pink text-white font-bold py-2 rounded hover:bg-pink-600 transition text-xs uppercase tracking-widest">Salvar</button>
+                    <button onclick="deleteEvent()" id="btn-delete" class="hidden px-3 bg-dark-800 border border-red-500 text-red-500 font-bold rounded hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
     <div id="footer-placeholder"></div>
-    <script type="module" src="assets/js/main.js"></script>
+    
     <script type="module" src="../assets/js/main.js"></script>
+
+    <script>
+        let calendar;
+        let events = [];
+        const LS_KEY_AGENDA = 'ODIN_PEDAGOGICO_AGENDA';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            initCalendar();
+            updateTicker();
+        });
+
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    // AQUI ESTÁ A MUDANÇA PARA TRADUÇÃO E VIEW DE ANO
+                    right: 'dayGridMonth,timeGridWeek,multiMonthYear,listMonth' 
+                },
+                // FORÇANDO TRADUÇÃO MANUAL
+                locale: 'pt-br',
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia',
+                    list: 'Lista',
+                    year: 'Ano' // Tradução para multiMonthYear
+                },
+                editable: true,
+                selectable: true,
+                height: '100%',
+                events: events,
+                dateClick: function(info) { openEventModal(null, info.dateStr); },
+                eventClick: function(info) { openEventModal(info.event); },
+                eventDrop: function(info) { updateEventDate(info.event); }
+            });
+            calendar.render();
+        }
+
+        function loadEvents() {
+            const data = localStorage.getItem(LS_KEY_AGENDA);
+            if(data) events = JSON.parse(data);
+        }
+
+        function saveEventsToStorage() {
+            localStorage.setItem(LS_KEY_AGENDA, JSON.stringify(events));
+            updateTicker();
+            renderUpcomingList();
+        }
+
+        function saveEvent() {
+            const id = document.getElementById('evt-id').value;
+            const title = document.getElementById('evt-title').value;
+            const date = document.getElementById('evt-date').value;
+            const color = document.getElementById('evt-color').value;
+
+            if(!title || !date) return showToast('Preencha os dados', 'error');
+
+            if(id) {
+                const event = calendar.getEventById(id);
+                event.setProp('title', title);
+                event.setStart(date);
+                event.setProp('backgroundColor', color);
+                event.setProp('borderColor', color);
+                const idx = events.findIndex(e => e.id === id);
+                if(idx > -1) events[idx] = { id, title, start: date, backgroundColor: color, borderColor: color };
+            } else {
+                const newEvent = { id: String(Date.now()), title, start: date, backgroundColor: color, borderColor: color, allDay: true };
+                calendar.addEvent(newEvent);
+                events.push(newEvent);
+            }
+            saveEventsToStorage(); closeEventModal(); showToast('Salvo!', 'success');
+        }
+
+        function deleteEvent() {
+            const id = document.getElementById('evt-id').value;
+            if(id && confirm("Excluir evento?")) {
+                calendar.getEventById(id).remove();
+                events = events.filter(e => e.id !== id);
+                saveEventsToStorage(); closeEventModal(); showToast('Excluído.', 'info');
+            }
+        }
+
+        function updateEventDate(calEvent) {
+            const idx = events.findIndex(e => e.id === calEvent.id);
+            if(idx > -1) { events[idx].start = calEvent.startStr; saveEventsToStorage(); }
+        }
+
+        function updateTicker() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayEvents = events.filter(e => e.start === today && e.backgroundColor === '#FF0080');
+            const futureEvents = events.filter(e => e.start > today).sort((a,b) => a.start.localeCompare(b.start));
+            const nextEvent = futureEvents.length > 0 ? `${futureEvents[0].start.split('-').reverse().join('/')} - ${futureEvents[0].title}` : 'NENHUM';
+            const supportText = todayEvents.length > 0 ? todayEvents.map(e => e.title.replace('Suporte - ', '')).join(', ') : 'NÃO AGENDADO';
+
+            document.getElementById('dynamic-ticker').innerHTML = `
+                <span class="text-gray-400">SUPORTE HOJE: <span class="text-neon-pink">${supportText.toUpperCase()}</span></span>
+                <span class="text-gray-400">PRÓXIMO: <span class="text-neon-cyan">${nextEvent.toUpperCase()}</span></span>
+                <span class="text-gray-400">TOTAL: <span class="text-white">${events.length}</span></span>
+                <span class="text-gray-400">STATUS: <span class="text-neon-green">ONLINE</span></span>
+            `;
+        }
+
+        function renderUpcomingList() {
+            const list = document.getElementById('upcoming-list');
+            list.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
+            const upcoming = events.filter(e => e.start >= today).sort((a,b) => a.start.localeCompare(b.start)).slice(0, 6);
+
+            if(upcoming.length === 0) { list.innerHTML = '<p class="text-xs text-gray-500 text-center mt-4">Agenda livre.</p>'; return; }
+
+            upcoming.forEach(evt => {
+                const d = evt.start.split('-');
+                list.innerHTML += `<div class="flex items-center justify-between p-3 bg-dark-900 rounded border border-dark-600 hover:border-gray-500 transition"><div class="flex items-center gap-3"><div class="w-2 h-8 rounded-full" style="background-color: ${evt.backgroundColor}"></div><div><p class="text-xs font-bold text-white">${evt.title}</p><p class="text-[10px] text-gray-500">${d[2]}/${d[1]}</p></div></div><button onclick="deleteEventFromList('${evt.id}')" class="text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button></div>`;
+            });
+        }
+
+        function deleteEventFromList(id) {
+            if(confirm("Remover?")) { calendar.getEventById(id)?.remove(); events = events.filter(e => e.id !== id); saveEventsToStorage(); }
+        }
+
+        function openEventModal(event=null, dateStr=null) {
+            const modal = document.getElementById('event-modal');
+            const titleInput = document.getElementById('evt-title');
+            const dateInput = document.getElementById('evt-date');
+            const idInput = document.getElementById('evt-id');
+            const btnDelete = document.getElementById('btn-delete');
+
+            if(event) {
+                document.getElementById('modal-title').innerText = 'Editar Evento';
+                idInput.value = event.id;
+                titleInput.value = event.title;
+                dateInput.value = event.startStr;
+                document.getElementById('evt-color').value = event.backgroundColor;
+                btnDelete.classList.remove('hidden');
+            } else {
+                document.getElementById('modal-title').innerText = 'Novo Agendamento';
+                idInput.value = ''; titleInput.value = '';
+                dateInput.value = dateStr || new Date().toISOString().split('T')[0];
+                btnDelete.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
+        function showToast(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-pink text-neon-pink'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
+    </script>
 </body>
 </html>
