@@ -1,26 +1,99 @@
+// --- IMPORTAÇÕES DO FIREBASE (Via CDN para funcionar direto no browser) ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// --- SUAS CREDENCIAIS (Odin System) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBM5ZzM3zBVpIPj1Ln35F65jw7i_GZdb_I",
+  authDomain: "odin-system-47a30.firebaseapp.com",
+  projectId: "odin-system-47a30",
+  storageBucket: "odin-system-47a30.firebasestorage.app",
+  messagingSenderId: "1085403407316",
+  appId: "1:1085403407316:web:45d7ce483ecb81a7faec41",
+  measurementId: "G-RYPN4Q1DE9"
+};
+
+// --- INICIALIZAÇÃO DO SISTEMA ---
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
 document.addEventListener("DOMContentLoaded", function() {
     setFavicon();
-    loadHeader();
+    loadHeader(); 
     loadFooter();
     initMobileMenu();
+    initAuthListener(); // Inicia o vigia de login
 });
 
-// Lógica de Caminhos Relativos
+// Caminhos relativos
 const isPagesDir = window.location.pathname.includes('/pages/');
 const basePath = isPagesDir ? '..' : '.'; 
 const pagesPath = isPagesDir ? '.' : './pages'; 
 
-// 1. FAVICON FORÇADO (Com Cache Buster)
+// 1. LÓGICA DE AUTENTICAÇÃO (LOGIN/LOGOUT)
+function initAuthListener() {
+    onAuthStateChanged(auth, (user) => {
+        const userArea = document.getElementById('user-area');
+        if (!userArea) return;
+
+        if (user) {
+            // -- USUÁRIO LOGADO --
+            // Se não tiver foto, usa o logo do Odin como fallback
+            const displayName = user.displayName || "Operador Odin";
+            const photoURL = user.photoURL || `${basePath}/assets/img/odin-logo.png`;
+            
+            userArea.innerHTML = `
+                <div class="text-right hidden md:block">
+                    <p class="text-white text-xs font-bold group-hover:text-neon-cyan transition">${displayName}</p>
+                    <p class="text-gray-500 text-[10px] font-mono tracking-wider text-neon-green">ONLINE • GOOGLE ID</p>
+                </div>
+                <div class="relative group cursor-pointer" onclick="window.logoutODIN()">
+                    <img src="${photoURL}" class="w-10 h-10 rounded-lg border border-dark-600 shadow-inner group-hover:border-neon-cyan transition-all object-cover">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-neon-green border-2 border-dark-900 rounded-full"></div>
+                    
+                    <div class="absolute right-0 top-12 w-32 bg-dark-800 border border-dark-600 rounded p-2 opacity-0 group-hover:opacity-100 transition invisible group-hover:visible text-center pointer-events-none z-50">
+                        <span class="text-[10px] text-red-400 font-bold">Clique para Sair</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            // -- USUÁRIO DESLOGADO --
+            userArea.innerHTML = `
+                <button onclick="window.loginODIN()" class="flex items-center gap-2 px-4 py-2 bg-neon-cyan/10 border border-neon-cyan/50 rounded text-neon-cyan hover:bg-neon-cyan hover:text-dark-900 transition font-bold text-xs uppercase tracking-wider shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                    <i class="fab fa-google"></i> Acessar
+                </button>
+            `;
+        }
+    });
+}
+
+// Funções globais para o HTML acessar
+window.loginODIN = () => {
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            console.log("Login OK:", result.user.displayName);
+        }).catch((error) => {
+            console.error("Erro Login:", error);
+            alert("Erro ao conectar com Google. Verifique o console.");
+        });
+};
+
+window.logoutODIN = () => {
+    if(confirm("Desconectar do ODIN?")) {
+        signOut(auth).then(() => {
+            console.log("Desconectado");
+        });
+    }
+};
+
+// 2. UI & COMPONENTES
 function setFavicon() {
-    // Remove favicons antigos ou padrões do navegador
     const existingIcons = document.querySelectorAll("link[rel*='icon']");
     existingIcons.forEach(icon => icon.remove());
-
-    // Cria o novo link
     const link = document.createElement('link');
     link.type = 'image/png';
     link.rel = 'shortcut icon';
-    // O parâmetro ?v= faz o navegador ignorar o cache e carregar a imagem agora
     link.href = `${basePath}/assets/img/odin-logo.png?v=${new Date().getTime()}`;
     document.getElementsByTagName('head')[0].appendChild(link);
 }
@@ -73,16 +146,11 @@ function loadHeader() {
                     <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neon-red rounded-full border-2 border-dark-900"></span>
                 </button>
                 <div class="h-8 w-px bg-dark-700"></div>
-                <div class="flex items-center gap-3 group cursor-pointer">
-                    <div class="text-right">
-                        <p class="text-white text-xs font-bold group-hover:text-neon-cyan transition">Raphael Barbosa</p>
-                        <p class="text-gray-500 text-[10px] font-mono tracking-wider">LEVEL 4 ADMIN</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-600 flex items-center justify-center text-gray-300 shadow-inner group-hover:border-neon-cyan transition-all">
-                        <i class="fas fa-user-astronaut"></i>
-                    </div>
-                </div>
+                
+                <div id="user-area" class="flex items-center gap-3 transition-all min-w-[150px] justify-end">
+                    <div class="w-24 h-3 bg-dark-700 rounded animate-pulse"></div> </div>
             </div>
+
             <button id="mobile-menu-btn" class="xl:hidden text-white text-2xl hover:text-neon-cyan transition"><i class="fas fa-bars"></i></button>
         </nav>
     </header>
@@ -97,12 +165,12 @@ function loadFooter() {
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600 font-mono">
             <div class="flex items-center gap-2">
                 <i class="fas fa-circle text-[6px] text-neon-green animate-pulse"></i>
-                <span>ODIN SYSTEM <span class="text-dark-700">|</span> v5.3 STABLE</span>
+                <span>ODIN SYSTEM <span class="text-dark-700">|</span> v7.0 AUTH</span>
             </div>
             <div class="mt-4 md:mt-0 flex gap-6">
-                <a href="#" class="hover:text-neon-cyan transition">System Status</a>
+                <a href="#" class="hover:text-neon-cyan transition">Status</a>
                 <a href="#" class="hover:text-neon-cyan transition">Docs</a>
-                <a href="#" class="hover:text-neon-cyan transition">Support</a>
+                <a href="#" class="hover:text-neon-cyan transition">Logout</a>
             </div>
         </div>
     </footer>`;
