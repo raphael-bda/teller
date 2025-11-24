@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda Inteligente | ODIN OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } } } } }
+    </script>
+    
+    <style>
+        /* Converted Tailwind @apply rules to plain CSS to avoid unknown at-rule errors */
+
+        /* Color references from the original Tailwind config:
+           dark-900: #050507
+           dark-800: #0E0E12
+           dark-700: #1A1A23
+           dark-600: #2A2A35
+           neon-orange: #F59E0B
+           neon-cyan: #00F0FF
+           neon-green: #00FF94
+           neon-pink: #FF0080
+        */
+
+        .glass-panel {
+            background-color: rgba(14, 14, 18, 0.6); /* bg-dark-800/60 */
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px); /* backdrop-blur-xl */
+            border: 1px solid #1A1A23; /* border-dark-700 */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.45); /* shadow-lg */
+            border-radius: 0.75rem;
+        }
+
+        .input-tech {
+            width: 100%;
+            background-color: #050507; /* bg-dark-900 */
+            border: 1px solid #2A2A35; /* border-dark-600 */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-family: "JetBrains Mono", monospace;
+            outline: none;
+            transition: box-shadow .15s ease, border-color .15s ease;
+            font-size: .875rem;
+        }
+        .input-tech::placeholder { color: #6B7280; } /* placeholder-gray-600 */
+        .input-tech:focus {
+            border-color: #F59E0B; /* neon-orange */
+            box-shadow: 0 0 10px rgba(245,158,11,0.2);
+        }
+
+        /* FullCalendar Dark Theme Overrides */
+        .fc {
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+            color: #D1D5DB; /* text-gray-300 */
+            --fc-border-color: #1A1A23;
+            --fc-today-bg-color: rgba(245, 158, 11, 0.1);
+            --fc-event-border-color: transparent;
+        }
+        .fc-toolbar-title {
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            font-size: 1.125rem;
+            font-weight: 900 !important;
+        }
+        .fc-button {
+            background-color: #1A1A23; /* bg-dark-700 */
+            border: 1px solid #2A2A35; /* border-dark-600 */
+            font-size: .75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: inherit;
+            transition: background-color .15s ease, border-color .15s ease;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.35) !important;
+        }
+        .fc-button:hover {
+            background-color: #F59E0B; /* hover:bg-neon-orange */
+            border-color: #F59E0B;
+            color: #050507; /* hover:text-dark-900 */
+        }
+        .fc-button-active {
+            background-color: #F59E0B !important;
+            color: #050507 !important;
+            border-color: #F59E0B !important;
+        }
+        .fc-col-header-cell {
+            background-color: #050507; /* bg-dark-900 */
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #6B7280; /* text-gray-500 */
+        }
+        .fc-daygrid-day-number {
+            font-size: .75rem;
+            font-weight: 700;
+            color: #9CA3AF; /* text-gray-400 */
+            transition: color .15s ease;
+        }
+        .fc-daygrid-day-number:hover { color: #F59E0B; /* neon-orange */ }
+        .fc-event {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+            transition: transform .12s ease;
+            cursor: pointer;
+            border-radius: .375rem;
+            padding: .25rem .5rem;
+            border-left-width: 4px;
+        }
+        .fc-event:hover { transform: scale(1.05); }
+
+        .fc-timegrid-slot { transition: background-color .12s ease; }
+        .fc-timegrid-slot:hover { background-color: rgba(255,255,255,0.03); }
+
+        body {
+            background-color: #050507; /* bg-dark-900 */
+            color: #D1D5DB; /* text-gray-300 */
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow pt-32 md:pt-40 px-4 md:px-6 container mx-auto pb-20">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4 border-b border-dark-700 pb-6">
+            <div>
+                <div class="flex items-center gap-2 text-neon-orange mb-2 font-mono text-xs tracking-widest uppercase">
+                    <div class="w-2 h-2 bg-neon-orange rounded-full animate-pulse"></div> Assistente Temporal
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+                    Agenda Inteligente <span class="text-dark-700">/</span> Odin
+                </h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                    <p class="text-[10px] uppercase font-bold text-gray-500">Eventos Hoje</p>
+                    <p class="text-xl font-mono text-neon-orange font-bold" id="today-count">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            
+            <div class="lg:col-span-3 space-y-6">
+                
+                <div class="glass-panel p-5 rounded-xl border-t-4 border-t-neon-orange relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-4xl text-neon-orange"><i class="fas fa-magic"></i></div>
+                    <h3 class="text-white font-bold text-sm mb-3">Agendamento Rápido</h3>
+                    <p class="text-[10px] text-gray-500 mb-3">Digite naturalmente. Ex: "Reunião amanhã às 14h"</p>
+                    
+                    <div class="relative">
+                        <input type="text" id="smart-input" class="input-tech pr-10" placeholder="Digite aqui...">
+                        <button onclick="processSmartInput()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-neon-orange transition"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div id="smart-feedback" class="text-[10px] mt-2 h-4 text-neon-green font-bold"></div>
+                </div>
+
+                <div class="glass-panel rounded-xl overflow-hidden flex flex-col h-[400px]">
+                    <div class="p-4 border-b border-dark-700 bg-dark-800/80 flex justify-between items-center">
+                        <h3 class="text-white font-bold text-xs uppercase tracking-wider"><i class="far fa-clock mr-2 text-neon-cyan"></i> Na Fila</h3>
+                    </div>
+                    <div class="overflow-y-auto p-4 space-y-2 custom-scroll flex-grow" id="upcoming-list">
+                        </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl">
+                    <h4 class="text-[10px] text-gray-500 uppercase font-bold mb-3">Categorias</h4>
+                    <div class="space-y-2 text-xs font-bold">
+                        <div class="flex items-center gap-2 cursor-pointer hover:opacity-80" onclick="filterCalendar('all')"><div class="w-3 h-3 rounded-full bg-white border border-gray-500"></div> Todos</div>
+                        <div class="flex items-center gap-2 text-neon-cyan cursor-pointer hover:opacity-80"><div class="w-3 h-3 rounded-full bg-neon-cyan"></div> Reunião</div>
+                        <div class="flex items-center gap-2 text-neon-green cursor-pointer hover:opacity-80"><div class="w-3 h-3 rounded-full bg-neon-green"></div> Prazo / Entrega</div>
+                        <div class="flex items-center gap-2 text-neon-pink cursor-pointer hover:opacity-80"><div class="w-3 h-3 rounded-full bg-neon-pink"></div> Suporte</div>
+                        <div class="flex items-center gap-2 text-neon-orange cursor-pointer hover:opacity-80"><div class="w-3 h-3 rounded-full bg-neon-orange"></div> Urgente</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9">
+                <div class="glass-panel p-2 md:p-4 rounded-xl h-[750px] bg-dark-800/40">
+                    <div id='calendar' class="h-full"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="event-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-[fadeIn_0.2s]">
+        <div class="glass-panel p-6 rounded-xl w-full max-w-md border border-dark-600 relative shadow-2xl shadow-neon-orange/20">
+            <button onclick="closeEventModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            
+            <h3 class="text-xl font-black text-white mb-6 flex items-center"><i class="far fa-calendar-alt mr-3 text-neon-orange"></i> <span id="modal-title">Detalhes</span></h3>
+            <input type="hidden" id="evt-id">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">O que vai acontecer?</label>
+                    <input type="text" id="evt-title" class="input-tech text-lg font-bold" placeholder="Título do evento">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Data</label>
+                        <input type="date" id="evt-date" class="input-tech">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Hora</label>
+                        <input type="time" id="evt-time" class="input-tech">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Categoria</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="selectColor('#00F0FF', this)" class="color-btn h-8 rounded border border-dark-600 bg-neon-cyan/20 hover:bg-neon-cyan transition" data-color="#00F0FF"></button>
+                        <button type="button" onclick="selectColor('#00FF94', this)" class="color-btn h-8 rounded border border-dark-600 bg-neon-green/20 hover:bg-neon-green transition" data-color="#00FF94"></button>
+                        <button type="button" onclick="selectColor('#FF0080', this)" class="color-btn h-8 rounded border border-dark-600 bg-neon-pink/20 hover:bg-neon-pink transition" data-color="#FF0080"></button>
+                        <button type="button" onclick="selectColor('#F59E0B', this)" class="color-btn h-8 rounded border border-dark-600 bg-neon-orange/20 hover:bg-neon-orange transition ring-2 ring-white" data-color="#F59E0B"></button> </div>
+                    <input type="hidden" id="evt-color" value="#F59E0B">
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Observações</label>
+                    <textarea id="evt-desc" rows="3" class="input-tech resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 mt-6 pt-4 border-t border-dark-700">
+                    <button onclick="saveEvent()" class="flex-1 bg-neon-orange text-dark-900 font-bold py-3 rounded hover:bg-white transition uppercase text-xs tracking-widest">Salvar</button>
+                    <button onclick="deleteEvent()" id="btn-delete" class="hidden w-12 bg-dark-800 border border-red-500 text-red-500 font-bold rounded hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
+    <div id="footer-placeholder"></div>
+    
+    <script type="module" src="../assets/js/main.js"></script>
+
+    <script>
+        let calendar;
+        let events = [];
+        const LS_KEY_AGENDA = 'ODIN_SMART_AGENDA';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            initCalendar();
+            updateSidebar();
+            
+            // Listener para Smart Input (Enter)
+            document.getElementById('smart-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') processSmartInput();
+            });
+        });
+
+        // --- CORE DO CALENDÁRIO ---
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                locale: 'pt-br',
+                buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana', list: 'Lista' },
+                height: '100%',
+                editable: true,
+                droppable: true,
+                selectable: true,
+                events: events,
+                
+                // Interações
+                dateClick: (info) => openModal(null, info.dateStr),
+                eventClick: (info) => openModal(info.event),
+                eventDrop: (info) => handleDrop(info),
+                eventResize: (info) => handleDrop(info)
+            });
+            calendar.render();
+        }
+
+        // --- LÓGICA INTELIGENTE (SMART INPUT) ---
+        function processSmartInput() {
+            const input = document.getElementById('smart-input');
+            const text = input.value.toLowerCase();
+            const feedback = document.getElementById('smart-feedback');
+            
+            if(!text) return;
+
+            let date = new Date();
+            let time = "12:00";
+            let title = text;
+            let color = "#F59E0B"; // Laranja padrão
+
+            // 1. Detecção de Data Relativa
+            if (text.includes("hoje")) { /* já é hoje */ }
+            else if (text.includes("amanhã") || text.includes("amanha")) { date.setDate(date.getDate() + 1); }
+            else if (text.includes("depois de amanhã")) { date.setDate(date.getDate() + 2); }
+            
+            // 2. Detecção de Hora (ex: 14:30 ou 14h)
+            const timeMatch = text.match(/(\d{1,2})[:h](\d{2})?/);
+            if (timeMatch) {
+                let h = timeMatch[1].padStart(2, '0');
+                let m = timeMatch[2] || '00';
+                time = `${h}:${m}`;
+            }
+
+            // 3. Detecção de Categoria por Palavra-Chave
+            if (text.includes("reunião")) color = "#00F0FF"; // Cyan
+            if (text.includes("suporte")) color = "#FF0080"; // Pink
+            if (text.includes("prazo") || text.includes("entrega")) color = "#00FF94"; // Green
+
+            // Formatação Final
+            const dateStr = date.toISOString().split('T')[0];
+            
+            // Criar Evento
+            const newEvent = {
+                id: String(Date.now()),
+                title: input.value, // Usa o texto original como título (capitalizado)
+                start: `${dateStr}T${time}`,
+                backgroundColor: color,
+                borderColor: color,
+                extendedProps: { desc: "Criado via Smart Input" }
+            };
+
+            addEventToSystem(newEvent);
+            
+            // Feedback Visual
+            input.value = '';
+            feedback.innerText = `Agendado para ${date.toLocaleDateString()} às ${time}`;
+            setTimeout(() => feedback.innerText = '', 3000);
+        }
+
+        // --- CRUD ---
+        function loadEvents() {
+            const data = localStorage.getItem(LS_KEY_AGENDA);
+            if(data) events = JSON.parse(data);
+        }
+
+        function addEventToSystem(eventObj) {
+            events.push(eventObj);
+            calendar.addEvent(eventObj);
+            saveEvents();
+            showToast('Evento criado com inteligência!', 'success');
+        }
+
+        function saveEvents() {
+            localStorage.setItem(LS_KEY_AGENDA, JSON.stringify(events));
+            updateSidebar();
+        }
+
+        function saveEvent() {
+            const id = document.getElementById('evt-id').value;
+            const title = document.getElementById('evt-title').value;
+            const date = document.getElementById('evt-date').value;
+            const time = document.getElementById('evt-time').value;
+            const color = document.getElementById('evt-color').value;
+            const desc = document.getElementById('evt-desc').value;
+
+            if(!title || !date) return showToast('Preencha os campos obrigatórios', 'error');
+
+            const start = time ? `${date}T${time}` : date;
+            const allDay = !time;
+
+            if(id) {
+                // Edit
+                const event = calendar.getEventById(id);
+                event.setProp('title', title);
+                event.setStart(start);
+                event.setProp('backgroundColor', color);
+                event.setProp('borderColor', color);
+                event.setExtendedProp('desc', desc);
+                event.setAllDay(allDay);
+                
+                const idx = events.findIndex(e => e.id === id);
+                if(idx > -1) events[idx] = { id, title, start, backgroundColor: color, borderColor: color, extendedProps: { desc }, allDay };
+            } else {
+                // Create
+                const newEvt = { id: String(Date.now()), title, start, backgroundColor: color, borderColor: color, extendedProps: { desc }, allDay };
+                calendar.addEvent(newEvt);
+                events.push(newEvt);
+            }
+
+            saveEvents();
+            closeEventModal();
+        }
+
+        function deleteEvent() {
+            const id = document.getElementById('evt-id').value;
+            if(confirm("Excluir este evento?")) {
+                calendar.getEventById(id).remove();
+                events = events.filter(e => e.id !== id);
+                saveEvents();
+                closeEventModal();
+                showToast('Evento excluído.', 'info');
+            }
+        }
+
+        function handleDrop(info) {
+            const id = info.event.id;
+            const idx = events.findIndex(e => e.id === id);
+            if(idx > -1) {
+                events[idx].start = info.event.startStr;
+                if(info.event.end) events[idx].end = info.event.endStr;
+                saveEvents();
+                showToast('Reagendado com sucesso!', 'info');
+            }
+        }
+
+        // --- UI ---
+        function openModal(event = null, dateStr = null) {
+            const modal = document.getElementById('event-modal');
+            const delBtn = document.getElementById('btn-delete');
+            
+            if(event) {
+                document.getElementById('modal-title').innerText = 'Editar';
+                document.getElementById('evt-id').value = event.id;
+                document.getElementById('evt-title').value = event.title;
+                
+                // Parse Date/Time
+                const d = event.start || new Date();
+                document.getElementById('evt-date').value = d.toISOString().split('T')[0];
+                const h = d.getHours().toString().padStart(2, '0');
+                const m = d.getMinutes().toString().padStart(2, '0');
+                document.getElementById('evt-time').value = event.allDay ? '' : `${h}:${m}`;
+                
+                document.getElementById('evt-desc').value = event.extendedProps?.desc || '';
+                updateColorSelection(event.backgroundColor);
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('modal-title').innerText = 'Novo';
+                document.getElementById('evt-id').value = '';
+                document.getElementById('evt-title').value = '';
+                document.getElementById('evt-date').value = dateStr || new Date().toISOString().split('T')[0];
+                document.getElementById('evt-time').value = '';
+                document.getElementById('evt-desc').value = '';
+                updateColorSelection('#F59E0B'); // Default Orange
+                delBtn.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
+
+        function selectColor(color, btn) {
+            document.getElementById('evt-color').value = color;
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('ring-2', 'ring-white'));
+            btn.classList.add('ring-2', 'ring-white');
+        }
+
+        function updateColorSelection(color) {
+            document.getElementById('evt-color').value = color;
+            document.querySelectorAll('.color-btn').forEach(b => {
+                if(b.dataset.color === color) b.classList.add('ring-2', 'ring-white');
+                else b.classList.remove('ring-2', 'ring-white');
+            });
+        }
+
+        function updateSidebar() {
+            const list = document.getElementById('upcoming-list');
+            list.innerHTML = '';
+            
+            const today = new Date().toISOString().split('T')[0];
+            // Filtra futuros, ordena por data
+            const upcoming = events
+                .filter(e => e.start >= today)
+                .sort((a,b) => a.start.localeCompare(b.start))
+                .slice(0, 10);
+
+            if(upcoming.length === 0) list.innerHTML = '<p class="text-center text-gray-500 text-xs mt-4">Agenda livre.</p>';
+
+            upcoming.forEach(e => {
+                const dateObj = new Date(e.start);
+                const day = dateObj.getDate().toString().padStart(2,'0');
+                const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
+                const time = e.start.includes('T') ? e.start.split('T')[1].substring(0,5) : 'Dia todo';
+
+                list.innerHTML += `
+                <div class="flex items-center gap-3 p-3 bg-dark-900 rounded border border-dark-600 hover:border-[${e.backgroundColor}] transition cursor-pointer group" onclick="calendar.gotoDate('${e.start}')">
+                    <div class="flex flex-col items-center justify-center w-10 h-10 bg-dark-800 rounded border border-dark-700">
+                        <span class="text-[8px] uppercase text-gray-500 font-bold">DIA</span>
+                        <span class="text-sm font-bold text-white">${day}</span>
+                    </div>
+                    <div class="flex-grow overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate group-hover:text-[${e.backgroundColor}] transition">${e.title}</p>
+                        <p class="text-[10px] text-gray-500 flex items-center gap-1"><i class="far fa-clock"></i> ${time}</p>
+                    </div>
+                    <div class="w-2 h-2 rounded-full" style="background-color: ${e.backgroundColor}"></div>
+                </div>`;
+            });
+
+            // Update Ticker
+            const todayEvents = events.filter(e => e.start.startsWith(today));
+            document.getElementById('today-count').innerText = todayEvents.length;
+        }
+
+        function showToast(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-orange text-neon-orange'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Suporte | ODIN OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{dark:{900:'#050507',800:'#0E0E12'},neon:{cyan:'#00F0FF'}}}}} </script>
+</head>
+<body class="bg-dark-900 text-gray-300 flex flex-col min-h-screen">
+    <div id="header-placeholder"></div>
+    <main class="flex-grow pt-40 px-6 container mx-auto flex items-center justify-center">
+        <div class="bg-dark-800 border border-gray-700 p-8 rounded-2xl w-full max-w-lg shadow-2xl shadow-neon-cyan/10">
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3"><i class="fas fa-headset text-neon-cyan"></i> Suporte Técnico</h2>
+            <div class="space-y-4">
+                <input type="text" placeholder="Assunto" class="w-full bg-dark-900 border border-gray-600 rounded p-3 text-white outline-none focus:border-neon-cyan">
+                <select class="w-full bg-dark-900 border border-gray-600 rounded p-3 text-white outline-none focus:border-neon-cyan">
+                    <option>Erro no Sistema</option>
+                    <option>Problema de Acesso</option>
+                    <option>Hardware / Impressora</option>
+                </select>
+                <textarea rows="4" placeholder="Descreva o erro..." class="w-full bg-dark-900 border border-gray-600 rounded p-3 text-white outline-none focus:border-neon-cyan resize-none"></textarea>
+                <button class="w-full bg-neon-cyan text-dark-900 font-bold py-3 rounded hover:bg-white transition">Abrir Chamado</button>
+            </div>
+        </div>
+    </main>
+    <div id="footer-placeholder"></div>
+    <script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

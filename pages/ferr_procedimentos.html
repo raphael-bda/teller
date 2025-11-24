@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Procedimentos | ODIN OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{dark:{900:'#050507',800:'#0E0E12',700:'#1A1A23',600:'#2A2A35'},neon:{cyan:'#00F0FF',violet:'#7000FF',green:'#00FF94',orange:'#F59E0B'}}}}} </script>
+    <style>
+        /* Converted Tailwind @apply rules to plain CSS so they work in the browser without a build step */
+        .glass-panel {
+            background-color: rgba(14, 14, 18, 0.6); /* bg-dark-800/60 */
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); /* backdrop-blur-xl */
+            border: 1px solid #1A1A23; /* border-dark-700 */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5); /* shadow-lg */
+        }
+
+        .proc-card {
+            background-color: #050507; /* bg-dark-900 */
+            padding: 1.25rem; /* p-5 */
+            border-radius: 0.75rem; /* rounded-xl */
+            border: 1px solid #2A2A35; /* border-dark-600 */
+            transition: border-color .2s ease, box-shadow .2s ease; /* transition */
+            cursor: pointer;
+            margin-bottom: 1rem; /* mb-4 */
+        }
+
+        .proc-card:hover {
+            border-color: #F59E0B; /* hover:border-neon-orange */
+        }
+
+        body {
+            background-color: #050507; /* bg-dark-900 */
+            color: #D1D5DB; /* text-gray-300 */
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow pt-32 md:pt-40 px-6 container mx-auto pb-20">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 border-b border-dark-700 pb-6">
+            <div>
+                <div class="flex items-center gap-2 text-neon-orange mb-2 font-mono text-xs tracking-widest uppercase">
+                    <div class="w-2 h-2 bg-neon-orange rounded-full animate-pulse"></div> Base de Conhecimento
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight">Procedimentos Operacionais</h1>
+            </div>
+            <div class="relative w-full md:w-96">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                <input type="text" id="search-proc" placeholder="Pesquisar (Ex: Diploma, Multa...)" class="w-full bg-dark-800 border border-dark-600 rounded-full pl-12 pr-6 py-3 text-white focus:border-neon-orange outline-none transition shadow-lg">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="space-y-2 sticky top-32 h-fit">
+                <button onclick="filterCategory('all')" class="w-full text-left px-4 py-3 rounded-lg bg-neon-orange text-dark-900 font-bold hover:opacity-90 transition mb-4"><i class="fas fa-layer-group mr-2"></i> Todos</button>
+                <button onclick="filterCategory('secretaria')" class="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-800 transition"><i class="fas fa-folder-open mr-2"></i> Secretaria</button>
+                <button onclick="filterCategory('pedagogico')" class="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-800 transition"><i class="fas fa-brain mr-2"></i> Pedagógico</button>
+                <button onclick="filterCategory('financeiro')" class="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-800 transition"><i class="fas fa-wallet mr-2"></i> Financeiro</button>
+                <button onclick="filterCategory('ead')" class="w-full text-left px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-800 transition"><i class="fas fa-laptop mr-2"></i> EAD</button>
+                <button onclick="filterCategory('fluxo')" class="w-full text-left px-4 py-2 rounded-lg text-neon-cyan hover:text-white hover:bg-dark-800 transition border border-neon-cyan/20"><i class="fas fa-project-diagram mr-2"></i> Fluxos (Map)</button>
+            </div>
+
+            <div class="lg:col-span-3" id="procedures-list"></div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script type="module" src="../assets/js/main.js"></script>
+
+    <script>
+        const procedures = [
+            // SECRETARIA (Seus 28 itens + Fluxos)
+            { id: 1, sector: 'secretaria', title: "Atendimento ao Aluno", content: "1. Abrir IRC e verificar Histórico Escolar e Financeiro.\n2. Consultar DigiSac para contexto anterior.\n3. Registrar atendimento no histórico." },
+            { id: 2, sector: 'secretaria', title: "Solicitação de Notas Antigas", content: "Regra: Não solicitar notas de trabalhos > 3 meses.\nAção: Pedir para o aluno reenviar o trabalho para coordenacao@unifahe.edu.br." },
+            { id: 3, sector: 'secretaria', title: "Reposição de Aulas", content: "Direito: 3 reposições gratuitas. Máximo: 5 total.\nProcesso: Verificar planilha 'Escala 2025' > Confirmar disponibilidade > Agendar e cobrar taxa se excedente." },
+            { id: 4, sector: 'secretaria', title: "Conferência de Escala", content: "Periodicidade: Mensal (Final do mês).\nRequisito: Conferência dupla (2 pessoas) baseada nos cronogramas ativos." },
+            { id: 20, sector: 'secretaria', title: "Envio Correios (Digisac)", content: "1. Conferir solicitação no grupo.\n2. Validar endereço completo.\n3. Solicitar confecção à Certificação.\n4. Envelopar e despachar." },
+            { id: 21, sector: 'secretaria', title: "Declarações UNIFAHE", content: "Coletar: Nome, RG, CPF, Início, Período.\nAção: Inserir na planilha de controle e solicitar em lote via WhatsApp." },
+            { id: 24, sector: 'secretaria', title: "Processo de Matrícula", content: "1. Cadastrar dados pessoais.\n2. Gerar ficha financeira.\n3. Vincular turma/curso.\n4. Baixa no CRM > Encaminhar ao Financeiro." },
+            { id: 25, sector: 'secretaria', title: "Emissão de Carteirinha", content: "Check: Financeiro OK + Foto 3x4.\nValidade: Data término do curso + 6 meses (TCC/Estágio).\nEntrega: Link digital + Portal do Aluno." },
+            { id: 26, sector: 'secretaria', title: "Abertura de Turmas", content: "1. Migrar contatos para grupo WhatsApp.\n2. Enviar Cronograma e Data Início.\n3. Pedagogia: Enviar material da 1ª aula." },
+            
+            // PEDAGÓGICO
+            { id: 5, sector: 'pedagogico', title: "Lançamento Notas EAD", content: "IRC > Diário de Notas > Turma > Disciplina > Gerar Lista > Salvar.\n*Sempre confirmar turma antes de lançar." },
+            { id: 6, sector: 'pedagogico', title: "Presença EAD", content: "IRC > Lista Presença > Data > Turma.\nLançar 'PF' (Presença) para alunos ativos na plataforma." },
+            { id: 7, sector: 'pedagogico', title: "Regra de Aprovação EAD", content: "Média de 4 questionários (Nota Corte) + Artigo + Estágio.\nPedagogia: Mínimo 9 notas lançadas." },
+            { id: 8, sector: 'pedagogico', title: "Envio TCC/Estágio", content: "Artigos: artigotcciefe@unifahe.edu.br\nEstágios: estagioetcc@unifahe.edu.br\n*Sempre com cópia para coordenação. Anexar retorno no IRC." },
+
+            // FINANCEIRO
+            { id: 9, sector: 'financeiro', title: "Cancelamento/Rescisão", content: "Pré-aulas: Devolução 80% (20% multa).\nPós-início: Multa 20% sobre parcelas vincendas.\n*Exige carta de próprio punho." },
+            { id: 10, sector: 'financeiro', title: "Trancamento", content: "Requisito: 1 módulo concluído + Adimplência.\nPrazo máx: 6 meses.\n*Se houver débito, firmar confissão de dívida." },
+            { id: 11, sector: 'financeiro', title: "Régua de Inadimplência", content: "Multa 2% + Juros 1% a.m.\n60 dias: Vencimento antecipado do contrato.\n90 dias: Rescisão e Protesto." },
+
+            // FLUXOS MAPA MENTAL (Novos)
+            { id: 100, sector: 'fluxo', title: "Fluxo de Ingresso", content: "1. Lead (CRM) -> 2. Documentação (RG/CPF/Histórico) -> 3. Contrato Assinado -> 4. Pagamento 1ª Mensalidade -> 5. Enturmação (IRC)." },
+            { id: 101, sector: 'fluxo', title: "Ciclo de Vida Acadêmico", content: "Matrícula -> Cursando (Notas/Faltas) -> Rematrícula (Semestral) -> TCC/Estágio -> Colação -> Diplomação." },
+            { id: 102, sector: 'fluxo', title: "Fluxo de Evasão (Retenção)", content: "1. 3 Faltas Consecutivas: Alerta Pedagógico.\n2. Contato Secretaria (WhatsApp).\n3. Sem retorno: Contato Financeiro (Negociação).\n4. Insucesso: Cancelamento Administrativo." },
+            { id: 103, sector: 'fluxo', title: "Emissão de Diploma", content: "Checklist Final:\n[ ] Todas as notas > média\n[ ] Carga horária cumprida\n[ ] ENADE regular\n[ ] Documentação completa (com autenticação)\n[ ] Nada Consta Financeiro." },
+            
+            // CONTRATOS
+            { id: 14, sector: 'contrato', title: "Valores Extras", content: "Reposição: R$ 250 (após 3ª gratuita).\nDP: R$ 250/disciplina.\nTransferência: R$ 450.\nAtraso TCC: R$ 450." },
+            { id: 19, sector: 'contrato', title: "Programa Indicação", content: "Matrícula em até 6 meses: 10% desc. recorrente.\nApós 6 meses: 25% desc. pontual (uma parcela)." }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderList(procedures);
+            document.getElementById('search-proc').addEventListener('keyup', (e) => {
+                const term = e.target.value.toLowerCase();
+                renderList(procedures.filter(p => p.title.toLowerCase().includes(term) || p.content.toLowerCase().includes(term)));
+            });
+        });
+
+        function filterCategory(cat) {
+            if(cat === 'all') renderList(procedures);
+            else renderList(procedures.filter(p => p.sector === cat));
+        }
+
+        function renderList(data) {
+            const container = document.getElementById('procedures-list');
+            container.innerHTML = '';
+            if(data.length === 0) { container.innerHTML = '<div class="text-center text-gray-500 mt-10">Nenhum procedimento encontrado.</div>'; return; }
+            
+            data.forEach(p => {
+                let border = 'border-dark-600';
+                if(p.sector==='fluxo') border='border-neon-cyan';
+                if(p.sector==='financeiro') border='border-neon-orange';
+
+                container.innerHTML += `
+                <div class="proc-card ${border}" onclick="this.querySelector('.details').classList.toggle('hidden')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-white text-lg">${p.title}</h3>
+                        <span class="text-[10px] uppercase bg-dark-800 px-2 py-1 rounded text-gray-400 border border-dark-700">${p.sector}</span>
+                    </div>
+                    <div class="details hidden mt-4 pt-4 border-t border-dark-700 text-sm text-gray-300 whitespace-pre-line leading-relaxed">
+                        ${p.content}
+                    </div>
+                    <div class="text-center mt-2"><i class="fas fa-chevron-down text-gray-600 text-xs"></i></div>
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>
