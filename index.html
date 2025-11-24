@@ -36,10 +36,14 @@
     .bg-grid {
         background-size: 40px 40px;
     }
+
+    /* Oculta o corpo da página até a autenticação confirmar */
+    body.hidden-auth { visibility: hidden; opacity: 0; }
+    /* Garante que o background do corpo continue escuro mesmo oculto */
+    html { background-color: #050507; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen overflow-x-hidden">
-
+<body class="flex flex-col min-h-screen hidden-auth">
     <div class="fixed inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
     <div id="header-placeholder"></div>
 

@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
@@ -90,9 +89,14 @@
         ::-webkit-scrollbar-track { background: #050507; }
         ::-webkit-scrollbar-thumb { background: #1A1A23; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #00FF94; }
+
+            /* Oculta o corpo da página até a autenticação confirmar */
+            body.hidden-auth { visibility: hidden; opacity: 0; }
+            /* Garante que o background do corpo continue escuro mesmo oculto */
+            html { background-color: #050507; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen hidden-auth">
     <div id="header-placeholder"></div>
 
     <div class="fixed top-24 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
