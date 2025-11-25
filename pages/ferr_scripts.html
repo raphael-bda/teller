@@ -3,43 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <title>Scripts | ODIN OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{dark:{900:'#050507',800:'#0E0E12'},neon:{pink:'#FF0080'}}}}} </script>
+
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', pink: '#FF0080' } } } } }
+    </script>
+    <style>
+        /* Replaced Tailwind @apply directives with equivalent plain CSS so it runs in the browser */
+        .glass-panel {
+            background-color: rgba(14, 14, 18, 0.6); /* dark-800 at 60% */
+            backdrop-filter: blur(20px); /* backdrop-blur-xl */
+            border: 1px solid #1A1A23; /* dark-700 */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4); /* shadow-lg approximation */
+            border-radius: 0.75rem;
+        }
+        .input-tech {
+            width: 100%;
+            background-color: #050507; /* dark-900 */
+            border: 1px solid #2A2A35; /* dark-600 */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem; /* text-sm */
+            outline: none;
+            transition: all .15s ease;
+        }
+        .input-tech::placeholder {
+            color: #718096; /* placeholder-gray-600 */
+        }
+        .input-tech:focus {
+            border-color: #FF0080; /* neon-pink */
+            box-shadow: 0 0 10px rgba(255,0,128,0.2);
+        }
+        .script-card {
+            background-color: #050507; /* dark-900 */
+            border: 1px solid #1A1A23; /* dark-700 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.25rem; /* p-5 */
+            transition: border-color .15s ease, color .15s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .script-card:hover {
+            border-color: #FF0080; /* hover:border-neon-pink */
+        }
+        body {
+            background-color: #050507; /* dark-900 */
+            color: #D1D5DB; /* text-gray-300 */
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050507; }
+        ::-webkit-scrollbar-thumb { background: #1A1A23; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF0080; }
+    </style>
 </head>
-<body class="bg-dark-900 text-gray-300 flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen">
+    
     <div id="header-placeholder"></div>
-    <main class="flex-grow pt-40 px-6 container mx-auto">
-        <h1 class="text-3xl font-black text-white mb-8 border-b border-gray-700 pb-4">Scripts de Atendimento</h1>
+
+    <main class="flex-grow pt-32 md:pt-40 px-6 container mx-auto pb-20">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bg-dark-800 p-6 rounded-xl border border-gray-700 hover:border-neon-pink transition group">
-                <div class="flex justify-between mb-4">
-                    <h3 class="font-bold text-white">Abordagem Inicial</h3>
-                    <i class="fab fa-whatsapp text-green-500"></i>
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 border-b border-dark-700 pb-6">
+            <div>
+                <div class="flex items-center gap-2 text-neon-pink mb-2 font-mono text-xs tracking-widest uppercase">
+                    <div class="w-2 h-2 bg-neon-pink rounded-full animate-pulse"></div> Comunicação Ágil
                 </div>
-                <p class="text-sm text-gray-400 italic mb-6 line-clamp-3">"Olá! Bem-vindo à IE Feras. Vi que você tem interesse em impulsionar sua carreira..."</p>
-                <button onclick="copyText('Olá! Bem-vindo à IE Feras...')" class="w-full py-2 border border-gray-600 rounded text-xs uppercase font-bold hover:bg-neon-pink hover:text-white hover:border-neon-pink transition">Copiar</button>
+                <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+                    Meus Scripts <span class="text-dark-700">/</span> Odin
+                </h1>
+            </div>
+            <div class="w-full md:w-auto flex flex-col md:flex-row gap-3">
+                <div class="relative w-full md:w-64">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" id="search-script" placeholder="Buscar script..." class="bg-dark-800 border border-dark-600 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:border-neon-pink outline-none w-full transition-all">
+                </div>
+                <button onclick="openModal()" class="bg-neon-pink text-white font-bold py-2 px-6 rounded hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20 text-xs uppercase tracking-widest flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fas fa-plus"></i> Criar Novo
+                </button>
+            </div>
+        </div>
+
+        <div id="scripts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
 
-            <div class="bg-dark-800 p-6 rounded-xl border border-gray-700 hover:border-neon-pink transition group">
-                <div class="flex justify-between mb-4">
-                    <h3 class="font-bold text-white">Cobrança Preventiva</h3>
-                    <i class="fas fa-wallet text-neon-pink"></i>
-                </div>
-                <p class="text-sm text-gray-400 italic mb-6 line-clamp-3">"Olá! Passando para lembrar que o vencimento da sua mensalidade é amanhã. Garanta seu desconto!"</p>
-                <button onclick="copyText('Olá! Passando para lembrar...')" class="w-full py-2 border border-gray-600 rounded text-xs uppercase font-bold hover:bg-neon-pink hover:text-white hover:border-neon-pink transition">Copiar</button>
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-gray-600 animate-[fadeIn_0.5s]">
+            <div class="w-20 h-20 bg-dark-800 rounded-full flex items-center justify-center mb-4 border border-dark-700">
+                <i class="fas fa-comment-slash text-3xl opacity-30"></i>
             </div>
-            
-            </div>
+            <h3 class="text-lg font-bold text-white mb-1">Nenhum script encontrado</h3>
+            <p class="text-sm mb-6">Crie sua biblioteca de respostas rápidas.</p>
+            <button onclick="openModal()" class="text-neon-pink border border-neon-pink/30 px-4 py-2 rounded hover:bg-neon-pink hover:text-white transition text-xs font-bold uppercase">Criar Primeiro Script</button>
+        </div>
+
     </main>
+
+    <div id="script-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-[fadeIn_0.2s]">
+        <div class="glass-panel p-6 rounded-xl w-full max-w-lg border border-dark-600 relative shadow-2xl shadow-neon-pink/20">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
+            
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fas fa-edit text-neon-pink"></i> <span id="modal-title">Novo Script</span>
+            </h3>
+            
+            <input type="hidden" id="script-id">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Título do Script</label>
+                    <input type="text" id="script-title" class="input-tech" placeholder="Ex: Boas Vindas, Cobrança Suave...">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Conteúdo da Mensagem</label>
+                    <textarea id="script-content" rows="6" class="input-tech resize-none leading-relaxed" placeholder="Digite o texto aqui..."></textarea>
+                </div>
+
+                <div class="flex gap-3 mt-6 pt-4 border-t border-dark-700">
+                    <button onclick="saveScript()" class="flex-1 bg-neon-pink text-white font-bold py-3 rounded hover:bg-pink-600 transition uppercase text-xs tracking-widest shadow-lg">Salvar Script</button>
+                    <button onclick="deleteScript()" id="btn-delete" class="hidden w-12 bg-dark-800 border border-red-500 text-red-500 font-bold rounded hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
     <div id="footer-placeholder"></div>
+    
     <script type="module" src="../assets/js/main.js"></script>
+
     <script>
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => alert("Copiado!"));
+        // --- GESTÃO DE DADOS ---
+        let scripts = [];
+        const LS_KEY = 'ODIN_USER_SCRIPTS';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadScripts();
+            
+            // Busca em tempo real
+            document.getElementById('search-script').addEventListener('keyup', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = scripts.filter(s => 
+                    s.title.toLowerCase().includes(term) || 
+                    s.content.toLowerCase().includes(term)
+                );
+                renderGrid(filtered);
+            });
+        });
+
+        // --- CRUD ---
+        function loadScripts() {
+            const data = localStorage.getItem(LS_KEY);
+            if (data) scripts = JSON.parse(data);
+            renderGrid(scripts);
+        }
+
+        function saveToStorage() {
+            localStorage.setItem(LS_KEY, JSON.stringify(scripts));
+            renderGrid(scripts);
+        }
+
+        function saveScript() {
+            const id = document.getElementById('script-id').value;
+            const title = document.getElementById('script-title').value.trim();
+            const content = document.getElementById('script-content').value.trim();
+
+            if (!title || !content) return showToast('Preencha título e conteúdo', 'error');
+
+            if (id) {
+                // Editar
+                const index = scripts.findIndex(s => s.id == id);
+                if (index > -1) {
+                    scripts[index] = { ...scripts[index], title, content, updated: new Date() };
+                    showToast('Script atualizado!', 'success');
+                }
+            } else {
+                // Criar
+                const newScript = {
+                    id: Date.now(),
+                    title,
+                    content,
+                    created: new Date()
+                };
+                scripts.unshift(newScript); // Adiciona no início
+                showToast('Script criado!', 'success');
+            }
+
+            saveToStorage();
+            closeModal();
+        }
+
+        function deleteScript() {
+            const id = document.getElementById('script-id').value;
+            if (id && confirm("Tem certeza que deseja excluir este script?")) {
+                scripts = scripts.filter(s => s.id != id);
+                saveToStorage();
+                closeModal();
+                showToast('Script excluído.', 'info');
+            }
+        }
+
+        // --- RENDERIZAÇÃO ---
+        function renderGrid(data) {
+            const grid = document.getElementById('scripts-grid');
+            const empty = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            empty.classList.add('hidden');
+
+            data.forEach(script => {
+                // Limita visualização do texto
+                const preview = script.content.length > 120 ? script.content.substring(0, 120) + "..." : script.content;
+                
+                grid.innerHTML += `
+                <div class="script-card animate-[fadeIn_0.3s]">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-white group-hover:text-neon-pink transition truncate pr-2">${script.title}</h3>
+                        <button onclick="openModal(${script.id})" class="text-gray-500 hover:text-white transition"><i class="fas fa-pen text-xs"></i></button>
+                    </div>
+                    
+                    <div class="flex-grow bg-dark-800/50 rounded p-3 border border-dark-700 mb-4">
+                        <p class="text-xs text-gray-400 font-mono leading-relaxed whitespace-pre-line">${preview}</p>
+                    </div>
+                    
+                    <button onclick="copyToClipboard(${script.id})" class="w-full bg-dark-800 hover:bg-neon-pink hover:text-white text-gray-300 border border-dark-600 py-2 rounded text-xs font-bold uppercase tracking-wider transition flex items-center justify-center gap-2 group-hover:border-neon-pink">
+                        <i class="far fa-copy"></i> Copiar Texto
+                    </button>
+                </div>`;
+            });
+        }
+
+        // --- UTILITÁRIOS ---
+        function copyToClipboard(id) {
+            const script = scripts.find(s => s.id == id);
+            if (script) {
+                navigator.clipboard.writeText(script.content).then(() => {
+                    showToast('Copiado para a área de transferência!', 'success');
+                });
+            }
+        }
+
+        function openModal(id = null) {
+            const modal = document.getElementById('script-modal');
+            const titleInput = document.getElementById('script-title');
+            const contentInput = document.getElementById('script-content');
+            const idInput = document.getElementById('script-id');
+            const btnDelete = document.getElementById('btn-delete');
+
+            if (id) {
+                // Modo Edição
+                const script = scripts.find(s => s.id == id);
+                document.getElementById('modal-title').innerText = 'Editar Script';
+                idInput.value = script.id;
+                titleInput.value = script.title;
+                contentInput.value = script.content;
+                btnDelete.classList.remove('hidden');
+            } else {
+                // Modo Criação
+                document.getElementById('modal-title').innerText = 'Novo Script';
+                idInput.value = '';
+                titleInput.value = '';
+                contentInput.value = '';
+                btnDelete.classList.add('hidden');
+            }
+            
+            modal.classList.remove('hidden');
+            titleInput.focus();
+        }
+
+        function closeModal() {
+            document.getElementById('script-modal').classList.add('hidden');
+        }
+
+        function showToast(msg, type='info') {
+            const container = document.getElementById('toast-container'); const t=document.createElement('div'); 
+            const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-pink text-neon-pink');
+            t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`;
+            t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; container.appendChild(t); 
+            setTimeout(()=>{t.remove()},3000);
         }
     </script>
 </body>
