@@ -10,7 +10,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configura o Worker do PDF.js (Essencial para performance)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{dark:{900:'#050507',800:'#0E0E12',700:'#1A1A23'},neon:{orange:'#F59E0B', green:'#00FF94'}}}}} </script>
     <style>
@@ -29,58 +34,56 @@
         <div class="glass-panel p-10 rounded-2xl w-full max-w-3xl text-center border-t-4 border-t-neon-orange relative overflow-hidden">
             
             <div class="mb-8">
-                <i class="fas fa-exchange-alt text-5xl text-neon-orange mb-4 animate-pulse"></i>
+                <i class="fas fa-exchange-alt text-5xl text-neon-orange mb-4"></i>
                 <h1 class="text-3xl font-bold text-white mb-2">Conversor ODIN</h1>
-                <p class="text-sm text-gray-500">Processamento local e seguro. Seus arquivos não saem do navegador.</p>
+                <p class="text-sm text-gray-500">Converta documentos com segurança local.</p>
+            </div>
+
+            <div class="mb-6 flex justify-center">
+                <div class="inline-flex bg-dark-900 border border-dark-600 rounded-lg p-1">
+                    <button onclick="setMode('img-to-pdf')" id="btn-mode-img" class="px-4 py-2 rounded text-xs font-bold bg-neon-orange text-dark-900 transition">IMG <i class="fas fa-arrow-right mx-1"></i> PDF</button>
+                    <button onclick="setMode('pdf-to-img')" id="btn-mode-pdf" class="px-4 py-2 rounded text-xs font-bold text-gray-400 hover:text-white transition">PDF <i class="fas fa-arrow-right mx-1"></i> IMG</button>
+                </div>
+                <input type="hidden" id="current-mode" value="img-to-pdf">
             </div>
             
             <div id="drop-zone" class="drop-zone border-2 border-dashed border-gray-600 rounded-xl p-12 transition cursor-pointer bg-dark-800/50 group relative">
-                <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" multiple>
+                <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" multiple accept="image/*">
                 
                 <div id="upload-placeholder">
                     <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 group-hover:text-white mb-3 transition"></i>
-                    <p class="font-bold text-white group-hover:text-neon-orange transition">Clique ou arraste arquivos aqui</p>
-                    <p class="text-xs text-gray-500 mt-2">Suporta: JPG, PNG (Para PDF)</p>
+                    <p class="font-bold text-white group-hover:text-neon-orange transition" id="drop-text">Solte suas IMAGENS aqui</p>
+                    <p class="text-xs text-gray-500 mt-2" id="drop-subtext">Suporta: JPG, PNG</p>
                 </div>
 
-                <div id="file-preview" class="hidden grid grid-cols-3 gap-4">
-                    </div>
+                <div id="file-preview" class="hidden grid grid-cols-3 gap-4 max-h-60 overflow-y-auto custom-scroll"></div>
             </div>
             
-            <div class="mt-8 bg-dark-900 p-4 rounded-xl border border-dark-700 flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div class="w-full md:w-1/2 text-left">
-                    <label class="text-[10px] uppercase font-bold text-gray-500 block mb-1">Ação</label>
-                    <select id="convert-action" class="w-full bg-dark-800 border border-gray-600 rounded px-3 py-2 text-white outline-none focus:border-neon-orange text-sm">
-                        <option value="img-to-pdf">Imagens para PDF (Unificar)</option>
-                        </select>
-                </div>
-                <div class="w-full md:w-auto flex items-end">
-                    <button onclick="processFiles()" id="btn-convert" class="w-full md:w-auto bg-neon-orange text-dark-900 font-bold px-8 py-2.5 rounded hover:bg-white transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fas fa-cog"></i> Converter Agora
-                    </button>
-                </div>
+            <div class="mt-8">
+                <button onclick="processFiles()" id="btn-convert" class="w-full bg-neon-orange text-dark-900 font-bold px-8 py-3 rounded hover:bg-white transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-cog"></i> Iniciar Conversão
+                </button>
             </div>
 
-            <div id="loader-overlay" class="absolute inset-0 bg-dark-900/90 z-50 hidden flex-col items-center justify-center">
+            <div id="loader-overlay" class="absolute inset-0 bg-dark-900/95 z-50 hidden flex-col items-center justify-center">
                 <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-12 w-12 mb-4"></div>
                 <h2 class="text-center text-white text-xl font-semibold">Processando...</h2>
-                <p class="text-center text-gray-500 text-sm" id="loader-text">Gerando documento</p>
+                <p class="text-center text-gray-500 text-sm mt-2" id="loader-text">Aguarde</p>
             </div>
 
         </div>
 
-        <div class="w-full max-w-3xl mt-8 hidden" id="download-area">
-            <h3 class="text-xs font-bold text-gray-500 uppercase mb-3 ml-2">Pronto para Download</h3>
+        <div class="w-full max-w-3xl mt-8 hidden animate-[fadeIn_0.5s]" id="download-area">
             <div class="bg-dark-800 border border-neon-green/30 rounded-lg p-4 flex justify-between items-center shadow-[0_0_15px_rgba(0,255,148,0.1)]">
                 <div class="flex items-center gap-3">
-                    <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+                    <i class="fas fa-check-circle text-neon-green text-2xl"></i>
                     <div>
-                        <p class="text-white font-bold text-sm" id="filename-result">documento.pdf</p>
-                        <p class="text-[10px] text-neon-green">Processamento Concluído</p>
+                        <p class="text-white font-bold text-sm" id="filename-result">arquivo.pdf</p>
+                        <p class="text-[10px] text-gray-400">Processamento Finalizado</p>
                     </div>
                 </div>
-                <a id="download-link" href="#" download class="bg-neon-green text-dark-900 px-4 py-2 rounded font-bold text-xs hover:bg-white transition flex items-center gap-2">
-                    <i class="fas fa-download"></i> Baixar
+                <a id="download-link" href="#" download class="bg-neon-green text-dark-900 px-6 py-2 rounded font-bold text-xs hover:bg-white transition flex items-center gap-2">
+                    <i class="fas fa-download"></i> Baixar Agora
                 </a>
             </div>
         </div>
@@ -92,194 +95,220 @@
     <script type="module" src="../assets/js/main.js"></script>
 
     <script>
-        // Variáveis Globais
+        // ESTADO
         let selectedFiles = [];
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const previewArea = document.getElementById('file-preview');
-        const uploadPlaceholder = document.getElementById('upload-placeholder');
 
-        // Event Listeners para Drag & Drop
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
+        // --- UI HANDLING ---
+        function setMode(mode) {
+            document.getElementById('current-mode').value = mode;
+            selectedFiles = []; // Limpa seleção anterior
+            updatePreview();
+            document.getElementById('download-area').classList.add('hidden');
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
-
-        // Processar Arquivos Selecionados
-        function handleFiles(files) {
-            if (files.length > 0) {
-                selectedFiles = Array.from(files); // Converte FileList para Array
-                updatePreview();
+            // Atualiza Botões Visuais
+            const btnImg = document.getElementById('btn-mode-img');
+            const btnPdf = document.getElementById('btn-mode-pdf');
+            
+            if(mode === 'img-to-pdf') {
+                btnImg.className = 'px-4 py-2 rounded text-xs font-bold bg-neon-orange text-dark-900 transition';
+                btnPdf.className = 'px-4 py-2 rounded text-xs font-bold text-gray-400 hover:text-white transition';
+                
+                document.getElementById('drop-text').innerText = "Solte suas IMAGENS aqui";
+                document.getElementById('drop-subtext').innerText = "Suporta: JPG, PNG";
+                fileInput.accept = "image/*";
+                fileInput.multiple = true;
+            } else {
+                btnPdf.className = 'px-4 py-2 rounded text-xs font-bold bg-neon-orange text-dark-900 transition';
+                btnImg.className = 'px-4 py-2 rounded text-xs font-bold text-gray-400 hover:text-white transition';
+                
+                document.getElementById('drop-text').innerText = "Solte seu PDF aqui";
+                document.getElementById('drop-subtext').innerText = "Suporta: Arquivos PDF (Extrai páginas como JPG)";
+                fileInput.accept = "application/pdf";
+                fileInput.multiple = false; // Apenas 1 PDF por vez para extração
             }
         }
 
+        // --- DRAG AND DROP ---
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            const mode = document.getElementById('current-mode').value;
+            
+            if(mode === 'pdf-to-img') {
+                if(files.length > 1 || files[0].type !== 'application/pdf') {
+                    return showToast('Selecione apenas UM arquivo PDF.', 'error');
+                }
+                selectedFiles = [files[0]];
+            } else {
+                // Filtra apenas imagens
+                const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
+                if(imgs.length === 0) return showToast('Nenhuma imagem válida.', 'error');
+                selectedFiles = [...selectedFiles, ...imgs];
+            }
+            updatePreview();
+        }
+
         function updatePreview() {
-            if (selectedFiles.length === 0) {
+            const placeholder = document.getElementById('upload-placeholder');
+            const mode = document.getElementById('current-mode').value;
+
+            if(selectedFiles.length === 0) {
                 previewArea.classList.add('hidden');
-                uploadPlaceholder.classList.remove('hidden');
+                placeholder.classList.remove('hidden');
                 return;
             }
-
-            uploadPlaceholder.classList.add('hidden');
+            placeholder.classList.add('hidden');
             previewArea.classList.remove('hidden');
             previewArea.innerHTML = '';
 
             selectedFiles.forEach((file, index) => {
-                const isImage = file.type.startsWith('image/');
-                const icon = isImage ? 'fa-image text-neon-orange' : 'fa-file text-gray-400';
-                
-                // Se for imagem, tenta mostrar thumbnail
-                let htmlContent = `<div class="relative bg-dark-900 border border-dark-600 rounded p-2 flex flex-col items-center justify-center aspect-square group">
-                    <button onclick="removeFile(${index})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"><i class="fas fa-times"></i></button>
-                    <i class="fas ${icon} text-3xl mb-2"></i>
-                    <p class="text-[10px] text-gray-400 truncate w-full text-center">${file.name}</p>
-                    <p class="text-[8px] text-dark-600">${(file.size/1024).toFixed(1)} KB</p>
-                </div>`;
-
-                if(isImage) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const div = previewArea.children[index];
-                        if(div) {
-                            div.innerHTML = `
-                            <button onclick="removeFile(${index})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"><i class="fas fa-times"></i></button>
-                            <img src="${e.target.result}" class="w-full h-full object-cover rounded opacity-70 group-hover:opacity-100 transition">
-                            <p class="absolute bottom-1 left-1 bg-black/70 text-[8px] px-1 rounded text-white truncate max-w-[90%]">${file.name}</p>`;
-                        }
-                    };
-                    reader.readAsDataURL(file);
+                let content = '';
+                if(mode === 'img-to-pdf') {
+                    const url = URL.createObjectURL(file);
+                    content = `<img src="${url}" class="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition">`;
+                } else {
+                    content = `<div class="flex flex-col items-center justify-center h-full w-full"><i class="fas fa-file-pdf text-red-500 text-3xl mb-2"></i></div>`;
                 }
 
-                previewArea.innerHTML += htmlContent;
+                previewArea.innerHTML += `
+                <div class="relative bg-dark-900 border border-dark-600 rounded p-2 aspect-square group">
+                    <button onclick="removeFile(${index})" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"><i class="fas fa-times"></i></button>
+                    ${content}
+                    <p class="absolute bottom-1 left-1 bg-black/70 text-[8px] px-1 rounded text-white truncate max-w-[90%]">${file.name}</p>
+                </div>`;
             });
         }
 
-        // Função Global para o HTML acessar (removeFile)
-        window.removeFile = (index) => {
-            selectedFiles.splice(index, 1);
-            // Hack para limpar o input e permitir selecionar o mesmo arquivo novamente
-            fileInput.value = ''; 
-            updatePreview();
-        };
+        window.removeFile = (index) => { selectedFiles.splice(index, 1); fileInput.value = ''; updatePreview(); };
 
-        // --- LÓGICA DE CONVERSÃO (CORE) ---
+        // --- ENGINE DE CONVERSÃO ---
         async function processFiles() {
-            if (selectedFiles.length === 0) return showToast('Selecione arquivos primeiro!', 'error');
-
-            const action = document.getElementById('convert-action').value;
+            if(selectedFiles.length === 0) return showToast('Selecione arquivos!', 'error');
+            
+            const mode = document.getElementById('current-mode').value;
             const loader = document.getElementById('loader-overlay');
-            const btn = document.getElementById('btn-convert');
-
-            // UI Loading
+            const loaderText = document.getElementById('loader-text');
+            
             loader.classList.remove('hidden');
             loader.classList.add('flex');
-            btn.disabled = true;
 
             try {
-                if (action === 'img-to-pdf') {
-                    await convertImagesToPDF(selectedFiles);
+                if(mode === 'img-to-pdf') {
+                    loaderText.innerText = "Unindo imagens em PDF...";
+                    await convertImgToPdf();
+                } else {
+                    loaderText.innerText = "Extraindo páginas do PDF...";
+                    await convertPdfToImg();
                 }
-                // Aqui podemos adicionar 'compress-pdf' futuramente
-            } catch (error) {
-                console.error(error);
-                showToast('Erro na conversão: ' + error.message, 'error');
-            } finally {
+            } catch (e) {
+                console.error(e);
+                showToast('Erro: ' + e.message, 'error');
                 loader.classList.add('hidden');
-                loader.classList.remove('flex');
-                btn.disabled = false;
             }
         }
 
-        async function convertImagesToPDF(files) {
+        // 1. Imagens -> PDF
+        async function convertImgToPdf() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF(); // Cria documento padrão A4 Portrait
+            const doc = new jsPDF();
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (!file.type.startsWith('image/')) continue;
-
-                document.getElementById('loader-text').innerText = `Processando imagem ${i+1}/${files.length}`;
+            for(let i=0; i<selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const data = await readFileAsDataURL(file);
                 
-                const imgData = await readFileAsDataURL(file);
-                const imgProps = doc.getImageProperties(imgData);
-                
-                // Calcula proporção para caber na A4 (210x297mm)
+                const imgProps = doc.getImageProperties(data);
                 const pdfWidth = doc.internal.pageSize.getWidth();
                 const pdfHeight = doc.internal.pageSize.getHeight();
                 
+                // Fit to page logic
                 const ratio = imgProps.width / imgProps.height;
                 let w = pdfWidth;
                 let h = w / ratio;
-
-                // Se a altura passar da página, ajusta pela altura
-                if (h > pdfHeight) {
-                    h = pdfHeight;
-                    w = h * ratio;
-                }
-
-                // Centraliza
+                if(h > pdfHeight) { h = pdfHeight; w = h * ratio; }
+                
                 const x = (pdfWidth - w) / 2;
                 const y = (pdfHeight - h) / 2;
 
-                if (i > 0) doc.addPage();
-                doc.addImage(imgData, 'JPEG', x, y, w, h);
+                if(i > 0) doc.addPage();
+                doc.addImage(data, 'JPEG', x, y, w, h);
             }
 
-            // Gera o arquivo Blob
-            const pdfBlob = doc.output('blob');
-            const pdfUrl = URL.createObjectURL(pdfBlob);
+            finishProcess(doc.output('blob'), 'ODIN_Album.pdf');
+        }
 
-            // Exibe área de download
-            const downloadArea = document.getElementById('download-area');
-            const downloadLink = document.getElementById('download-link');
-            const filenameResult = document.getElementById('filename-result');
+        // 2. PDF -> Imagens (ZIP)
+        async function convertPdfToImg() {
+            const file = selectedFiles[0];
+            const fileArrayBuffer = await file.arrayBuffer();
+            
+            // Carrega PDF
+            const pdf = await pdfjsLib.getDocument(fileArrayBuffer).promise;
+            const zip = new JSZip();
+            const folder = zip.folder("imagens_odin");
 
-            filenameResult.innerText = `ODIN_Convert_${Date.now()}.pdf`;
-            downloadLink.href = pdfUrl;
-            downloadLink.download = filenameResult.innerText;
+            const total = pdf.numPages;
+
+            for(let i=1; i<=total; i++) {
+                document.getElementById('loader-text').innerText = `Processando página ${i} de ${total}...`;
+                
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({scale: 2.0}); // Alta resolução
+                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({canvasContext: ctx, viewport: viewport}).promise;
+                
+                // Converte Canvas para Blob (JPG)
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+                folder.file(`pagina_${i}.jpg`, blob);
+            }
+
+            document.getElementById('loader-text').innerText = "Compactando ZIP...";
+            const zipContent = await zip.generateAsync({type:"blob"});
+            finishProcess(zipContent, 'ODIN_Imagens.zip');
+        }
+
+        function finishProcess(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.getElementById('download-link');
+            const nameEl = document.getElementById('filename-result');
+            const area = document.getElementById('download-area');
+            const loader = document.getElementById('loader-overlay');
+
+            link.href = url;
+            link.download = filename;
+            nameEl.innerText = filename;
+
+            loader.classList.add('hidden');
+            loader.classList.remove('flex');
+            area.classList.remove('hidden');
             
-            downloadArea.classList.remove('hidden');
-            showToast('Conversão concluída com sucesso!', 'success');
-            
-            // Reseta seleção
+            showToast('Concluído!', 'success');
             selectedFiles = [];
             updatePreview();
         }
 
-        // Helper: Lê arquivo como DataURL (Promisified)
         function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
+                reader.onload = (e) => resolve(e.target.result);
                 reader.readAsDataURL(file);
             });
         }
 
-        // --- TOAST ---
-        function showToast(msg, type='info') {
-            const container = document.getElementById('toast-container');
-            const t = document.createElement('div');
-            const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-orange text-neon-orange');
-            t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`;
-            t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`;
-            container.appendChild(t);
-            setTimeout(()=>{t.remove()},3000);
-        }
+        function showToast(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-orange text-neon-orange'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
     </script>
 </body>
 </html>
