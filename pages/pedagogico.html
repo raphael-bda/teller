@@ -19,18 +19,13 @@
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
     <style>
-        /* Replaced Tailwind @apply utilities with static CSS for browser usage */
-
-        /* Glass panel appearance */
+        /* Converted Tailwind @apply utility rules into plain CSS to avoid PostCSS/Tailwind-only directives */
         .glass-panel {
-            background-color: rgba(14, 14, 18, 0.6); /* dark-800/60 */
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
-            border: 1px solid #1A1A23; /* dark-700 */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            background-color: rgba(14, 14, 18, 0.6); /* approx dark-800/60 */
+            backdrop-filter: blur(10px); /* approximate backdrop-blur-xl */
+            border: 1px solid #1A1A23; /* border-dark-700 */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -2px rgba(0,0,0,0.5);
         }
-
-        /* Input style used across the UI */
         .input-tech {
             width: 100%;
             background-color: #050507; /* dark-900 */
@@ -40,45 +35,42 @@
             color: #ffffff;
             font-family: 'JetBrains Mono', monospace;
             outline: none;
-            font-size: 0.875rem; /* text-sm */
-            transition: box-shadow .15s ease, border-color .15s ease;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
         }
         .input-tech::placeholder {
-            color: #6B7280; /* placeholder gray */
+            color: #6B7280; /* placeholder-gray-600 approximation */
         }
         .input-tech:focus {
-            border-color: #FF0080; /* neon-pink */
-            box-shadow: 0 0 10px rgba(255, 0, 128, 0.2);
+            box-shadow: 0 0 10px rgba(255,0,128,0.2);
+            border-left-width: 4px;
+            border-left-color: #FF0080; /* neon-pink */
         }
 
-        /* FullCalendar / UI tweaks */
         .fc {
             font-family: 'Inter', sans-serif;
-            color: #d1d5db; /* text-gray-300 */
+            color: #D1D5DB; /* text-gray-300 */
             --fc-border-color: #1A1A23;
             --fc-today-bg-color: rgba(255, 158, 11, 0.1);
         }
         .fc-toolbar-title {
             color: #ffffff;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.08em;
             font-size: 0.875rem;
             font-weight: 700 !important;
         }
         .fc-button {
             background-color: #1A1A23; /* dark-700 */
-            border: 1px solid #2A2A35; /* dark-600 */
+            border-color: #2A2A35; /* dark-600 */
             font-size: 0.75rem;
             text-transform: uppercase;
             font-weight: 700;
-            padding: 0.25rem 0.5rem;
-            color: #d1d5db !important;
             cursor: pointer !important;
-            transition: background-color .15s ease, color .15s ease;
         }
         .fc-button:hover {
             background-color: #FF0080; /* neon-pink */
-            color: #ffffff !important;
+            color: #ffffff;
         }
         .fc-button-active {
             background-color: #FF0080 !important;
@@ -86,11 +78,10 @@
             color: #ffffff !important;
         }
 
-        /* Table builder */
         .table-builder th {
             font-size: 10px;
             text-transform: uppercase;
-            color: #6B7280; /* gray-500 */
+            color: #6B7280; /* text-gray-500 */
             font-weight: 700;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid #1A1A23; /* border-dark-700 */
@@ -98,13 +89,12 @@
         .table-builder td {
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid #0E0E12; /* border-dark-800 */
+            border-bottom: 1px solid #050507; /* border-dark-800 approx */
         }
 
-        /* Page base */
         body {
             background-color: #050507; /* dark-900 */
-            color: #d1d5db; /* text-gray-300 */
+            color: #D1D5DB; /* text-gray-300 */
         }
     </style>
 </head>
@@ -115,7 +105,7 @@
     <div class="fixed top-24 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
         <div class="whitespace-nowrap animate-marquee text-xs font-mono flex gap-12" id="dynamic-ticker">
             <span class="text-gray-400">CRONOGRAMA 2025: <span class="text-neon-pink">ATIVO</span></span>
-            <span class="text-gray-400">AULAS MENSAIS: <span class="text-neon-cyan">CONFIGURADO</span></span>
+            <span class="text-gray-400">FILTROS: <span class="text-neon-cyan">HABILITADOS</span></span>
             <span class="text-gray-400">STATUS: <span class="text-neon-green">SISTEMA OPERANTE</span></span>
         </div>
     </div>
@@ -131,12 +121,23 @@
                 </h1>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex gap-3 items-center">
+                <div class="hidden md:flex items-center bg-dark-800 border border-dark-600 rounded px-2 mr-2">
+                    <i class="fas fa-filter text-gray-500 text-xs mr-2"></i>
+                    <select id="calendar-filter" onchange="filterCalendar()" class="bg-transparent text-xs text-white py-2 outline-none cursor-pointer uppercase font-bold w-32">
+                        <option value="all">Todas Turmas</option>
+                        <option value="pedagogia">Pedagogia</option>
+                        <option value="neuro">Neuro</option>
+                        <option value="gestao">Gestão</option>
+                        <option value="suporte">Suporte</option>
+                    </select>
+                </div>
+
                 <a href="https://www.ircsystem.com.br/w2/index.php" target="_blank" class="bg-dark-800 border border-dark-600 text-white py-2 px-4 rounded hover:border-neon-pink transition text-xs uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-external-link-alt"></i> IRC System
+                    <i class="fas fa-external-link-alt"></i> IRC
                 </a>
                 <button onclick="openClassBuilder()" class="bg-neon-pink text-white font-bold py-2 px-4 rounded hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20 text-xs uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-layer-group"></i> Criar Nova Turma
+                    <i class="fas fa-layer-group"></i> Nova Turma
                 </button>
                 <button onclick="openEventModal()" class="bg-dark-800 border border-neon-pink text-neon-pink font-bold py-2 px-4 rounded hover:bg-neon-pink hover:text-white transition text-xs uppercase tracking-widest">
                     <i class="fas fa-calendar-plus"></i> Agenda
@@ -168,44 +169,36 @@
         <div class="glass-panel rounded-2xl w-full max-w-6xl border border-neon-pink/30 relative flex flex-col h-[90vh]">
             <div class="p-6 border-b border-dark-700 flex justify-between items-center bg-dark-800/50 rounded-t-2xl">
                 <div>
-                    <h2 class="text-2xl font-bold text-white flex items-center"><i class="fas fa-cubes text-neon-pink mr-3"></i> Construtor de Cronograma IEFE</h2>
-                    <p class="text-xs text-gray-400 mt-1">Defina a frequência mensal, horários e exporte o PDF oficial.</p>
+                    <h2 class="text-2xl font-bold text-white flex items-center"><i class="fas fa-cubes text-neon-pink mr-3"></i> Construtor de Cronograma</h2>
+                    <p class="text-xs text-gray-400 mt-1">Defina datas, matérias e gere a documentação completa.</p>
                 </div>
                 <button onclick="closeClassBuilder()" class="text-gray-500 hover:text-white text-xl"><i class="fas fa-times"></i></button>
             </div>
 
             <div class="flex-grow overflow-hidden flex flex-col md:flex-row">
                 <div class="w-full md:w-1/4 p-6 border-r border-dark-700 space-y-5 bg-dark-900/30 overflow-y-auto">
-                    <div>
-                        <label class="text-[10px] text-neon-pink uppercase font-bold block mb-1">1. Curso Base</label>
-                        <select id="builder-template" class="input-tech cursor-pointer" onchange="loadTemplate()">
-                            <option value="" disabled selected>Carregar Grade...</option>
-                            <option value="pedagogia">Pedagogia</option>
-                            <option value="neuro">Neuropsicopedagogia</option>
-                            <option value="gestao">Gestão Escolar</option>
-                            <option value="alfabetizacao">Alfabetização</option>
-                            <option value="psicologia">Psicologia</option>
-                            <option value="inclusiva">Ed. Inclusiva</option>
-                        </select>
-                    </div>
+                    <div><label class="text-[10px] text-neon-pink uppercase font-bold block mb-1">1. Curso Base</label><select id="builder-template" class="input-tech cursor-pointer" onchange="loadTemplate()"><option value="" disabled selected>Carregar Grade...</option><option value="pedagogia">Pedagogia</option><option value="neuro">Neuropsicopedagogia</option><option value="gestao">Gestão Escolar</option><option value="alfabetizacao">Alfabetização</option><option value="psicologia">Psicologia</option><option value="inclusiva">Ed. Inclusiva</option></select></div>
                     <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">2. Nome da Turma</label><input type="text" id="builder-name" class="input-tech border-l-4 border-l-neon-pink" placeholder="Ex: PÓS NEURO SÁBADO A25"></div>
                     <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">3. Horário</label><input type="text" id="builder-time" class="input-tech text-neon-cyan font-bold" placeholder="Ex: 08:00 às 17:00"></div>
-                    
+
                     <div class="p-3 bg-dark-800 rounded border border-dark-600">
                         <h4 class="text-[10px] font-bold text-white uppercase mb-2"><i class="fas fa-calendar-alt mr-1"></i> Gerar Datas</h4>
                         <div class="space-y-2">
-                            <div><label class="text-[10px] text-gray-500 block">Data Início</label><input type="date" id="builder-start" class="input-tech"></div>
-                            <div><label class="text-[10px] text-gray-500 block">Frequência</label><select id="builder-freq" class="input-tech"><option value="monthly" selected>Mensal</option><option value="weekly">Semanal</option></select></div>
-                            <button onclick="generateDates()" class="w-full bg-neon-cyan text-dark-900 text-xs font-bold py-2 rounded hover:bg-white transition">Aplicar</button>
+                            <div><label class="text-[10px] text-gray-500 block">Início</label><input type="date" id="builder-start" class="input-tech"></div>
+                            <div><label class="text-[10px] text-gray-500 block">Frequência</label><select id="builder-freq" class="input-tech"><option value="monthly" selected>Mensal (1x Mês)</option><option value="weekly">Semanal (7 Dias)</option></select></div>
+                            <div class="flex items-center gap-2 mt-2"><input type="checkbox" id="skip-holidays" class="w-3 h-3 rounded bg-dark-900 border-dark-600 text-neon-pink focus:ring-0" checked><label for="skip-holidays" class="text-[10px] text-gray-400 cursor-pointer">Pular Feriados</label></div>
+                            <button onclick="generateDates()" class="w-full bg-neon-cyan text-dark-900 text-xs font-bold py-2 rounded hover:bg-white transition mt-2">Aplicar Datas</button>
                         </div>
                     </div>
                 </div>
+
                 <div class="w-full md:w-3/4 p-6 bg-dark-800/20 flex flex-col h-full">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wider">Grade Curricular</h3>
                         <div class="flex gap-2">
-                            <button onclick="addSubjectRow()" class="text-xs bg-dark-700 hover:bg-white hover:text-dark-900 text-white px-3 py-1 rounded border border-gray-600 transition"><i class="fas fa-plus mr-1"></i> Add Aula</button>
-                            <button onclick="exportPreviewPDF()" class="text-xs bg-neon-green hover:bg-white text-dark-900 px-4 py-1 rounded font-bold transition shadow-lg shadow-neon-green/20"><i class="fas fa-file-pdf mr-1"></i> PDF Preview</button>
+                            <button onclick="addSubjectRow()" class="text-xs bg-dark-700 hover:bg-white hover:text-dark-900 text-white px-3 py-1 rounded border border-gray-600 transition"><i class="fas fa-plus mr-1"></i> Add</button>
+                            <button onclick="exportTeacherPDF()" class="text-xs bg-dark-700 hover:bg-neon-cyan hover:text-dark-900 text-neon-cyan px-3 py-1 rounded border border-neon-cyan/30 transition"><i class="fas fa-chalkboard-teacher mr-1"></i> Diário Docente</button>
+                            <button onclick="exportSchedulePDF()" class="text-xs bg-neon-green hover:bg-white text-dark-900 px-4 py-1 rounded font-bold transition shadow-lg shadow-neon-green/20"><i class="fas fa-file-pdf mr-1"></i> PDF Aluno</button>
                         </div>
                     </div>
                     <div class="overflow-y-auto custom-scroll flex-grow bg-dark-900/50 rounded-lg border border-dark-700">
@@ -218,7 +211,7 @@
             </div>
             <div class="p-4 border-t border-dark-700 bg-dark-800/80 rounded-b-2xl flex justify-end gap-3">
                 <button onclick="closeClassBuilder()" class="px-6 py-2 rounded text-sm font-bold text-gray-400 hover:text-white transition">Fechar</button>
-                <button onclick="saveClassToCalendar()" class="px-8 py-2 rounded bg-neon-pink text-white text-sm font-bold hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20 flex items-center gap-2"><i class="fas fa-calendar-check"></i> Criar e Salvar</button>
+                <button onclick="saveClassToCalendar()" class="px-8 py-2 rounded bg-neon-pink text-white text-sm font-bold hover:bg-pink-600 transition shadow-lg shadow-neon-pink/20 flex items-center gap-2"><i class="fas fa-calendar-check"></i> Salvar</button>
             </div>
         </div>
     </div>
@@ -226,24 +219,17 @@
     <div id="event-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-[fadeIn_0.2s]">
         <div class="glass-panel p-6 rounded-xl w-full max-w-md border border-dark-600 relative">
             <button onclick="closeEventModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
-            <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <i class="far fa-calendar-alt text-neon-pink"></i> <span id="modal-title">Detalhes</span>
-            </h3>
-            
-            <input type="hidden" id="evt-id">
-            <input type="hidden" id="evt-class-id"> 
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2"><i class="far fa-calendar-alt text-neon-pink"></i> <span id="modal-title">Detalhes</span></h3>
+            <input type="hidden" id="evt-id"><input type="hidden" id="evt-class-id">
             
             <div class="space-y-4">
-                <div id="class-controls" class="hidden bg-dark-800/80 border border-neon-cyan/30 p-4 rounded-lg mb-4">
-                    <h4 class="text-xs font-bold text-neon-cyan uppercase mb-2 flex items-center"><i class="fas fa-layer-group mr-2"></i> Gerenciar Turma</h4>
-                    <p id="class-info-text" class="text-[10px] text-gray-400 mb-3">Este evento pertence a um cronograma completo.</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="downloadClassPDF()" class="bg-dark-900 hover:bg-neon-green hover:text-dark-900 text-white border border-dark-600 py-2 rounded text-[10px] font-bold transition flex items-center justify-center gap-1">
-                            <i class="fas fa-file-pdf"></i> PDF Turma
-                        </button>
-                        <button onclick="deleteEntireClass()" class="bg-dark-900 hover:bg-red-500 hover:text-white text-red-500 border border-red-500/30 py-2 rounded text-[10px] font-bold transition flex items-center justify-center gap-1">
-                            <i class="fas fa-trash"></i> Excluir Turma
-                        </button>
+                <div id="class-controls" class="hidden bg-dark-800 border-l-4 border-neon-cyan p-4 rounded mb-4">
+                    <h4 class="text-xs font-bold text-neon-cyan uppercase mb-2">Gestão da Turma</h4>
+                    <p id="class-info-text" class="text-[10px] text-gray-400 mb-3">Vínculo detectado.</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="downloadClassPDF()" class="bg-dark-900 hover:bg-neon-green hover:text-dark-900 text-white py-2 rounded text-[9px] font-bold transition flex flex-col items-center justify-center gap-1"><i class="fas fa-file-pdf"></i> Aluno</button>
+                        <button onclick="downloadTeacherPDF()" class="bg-dark-900 hover:bg-neon-cyan hover:text-dark-900 text-white py-2 rounded text-[9px] font-bold transition flex flex-col items-center justify-center gap-1"><i class="fas fa-chalkboard-teacher"></i> Diário</button>
+                        <button onclick="deleteEntireClass()" class="bg-dark-900 hover:bg-red-500 hover:text-white text-red-500 py-2 rounded text-[9px] font-bold transition flex flex-col items-center justify-center gap-1"><i class="fas fa-trash-alt"></i> Excluir</button>
                     </div>
                 </div>
 
@@ -252,13 +238,17 @@
                     <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Data</label><input type="date" id="evt-date" class="input-tech"></div>
                     <div><label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Cor</label><select id="evt-color" class="input-tech"><option value="#FF0080">Suporte</option><option value="#00F0FF">Reunião</option><option value="#00FF94">Aula</option></select></div>
                 </div>
-                <div class="flex gap-2 mt-4 pt-2 border-t border-dark-700">
-                    <button onclick="saveEvent()" class="flex-1 bg-neon-pink text-white font-bold py-2 rounded hover:bg-pink-600 text-xs uppercase tracking-widest">Salvar Alteração</button>
-                    <button onclick="deleteEvent()" id="btn-delete" class="hidden w-10 bg-dark-800 border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                <div class="flex justify-between mt-6 pt-4 border-t border-dark-700 items-center">
+                    <button onclick="deleteEvent()" id="btn-delete" class="text-red-500 hover:text-white text-sm flex items-center gap-1 hidden"><i class="fas fa-trash"></i> Excluir Item</button>
+                    <button onclick="saveEvent()" class="bg-neon-pink text-white font-bold py-2 px-6 rounded hover:bg-pink-600 text-xs uppercase tracking-widest ml-auto">Salvar</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <datalist id="professores-list">
+        <option value="Prof. Xavier"><option value="Prof. Snape"><option value="Prof. Minerva"><option value="Prof. Keating">
+    </datalist>
 
     <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
     <div id="footer-placeholder"></div>
@@ -266,281 +256,176 @@
     <script type="module" src="../assets/js/main.js"></script>
 
     <script>
-        // --- DADOS ---
+        // FERIADOS 2025
+        const HOLIDAYS_2025 = ["2025-01-01", "2025-03-03", "2025-03-04", "2025-04-18", "2025-04-21", "2025-05-01", "2025-06-19", "2025-09-07", "2025-10-12", "2025-11-02", "2025-11-15", "2025-12-25"];
         const courseTemplates = {
-            'pedagogia': ["Didática Geral", "Psicologia da Educação", "História da Educação", "Sociologia da Educação", "Filosofia da Educação", "Libras", "Metodologia Científica", "Gestão Escolar", "Políticas Públicas", "Alfabetização", "Educação Inclusiva", "Estágio I", "Estágio II", "TCC I", "TCC II"],
-            'neuro': ["Fundamentos da Neurociência", "Neuroanatomia", "Desenvolvimento Humano", "Bases Neurológicas", "Transtornos", "Psicofarmacologia", "Avaliação Neuro", "Intervenção Clínica", "Estágio"],
-            'gestao': ["Legislação", "Gestão Democrática", "Planejamento", "Gestão de Pessoas", "Finanças", "Marketing Educacional", "Coordenação", "Tecnologias"]
+            'pedagogia': ["Didática Geral", "Psicologia", "História da Educação", "Sociologia", "Filosofia", "Libras", "Metodologia", "Gestão", "Políticas", "Alfabetização", "Inclusiva", "Estágio I", "Estágio II", "TCC I", "TCC II"],
+            'neuro': ["Neurociência", "Neuroanatomia", "Desenvolvimento", "Bases Neuro", "Transtornos", "Psicofarmaco", "Avaliação", "Intervenção", "Estágio"],
+            'gestao': ["Legislação", "Gestão Democrática", "Planejamento", "Pessoas", "Finanças", "Marketing", "Coordenação", "Tecnologias"]
         };
 
-        let currentSubjects = [];
-        let calendar;
-        let events = [];
+        let currentSubjects = []; let calendar; let events = []; let allEventsCache = [];
         const LS_KEY_AGENDA = 'ODIN_PEDAGOGICO_AGENDA';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadEvents(); initCalendar(); updateTicker(); renderUpcomingList();
-        });
+        document.addEventListener('DOMContentLoaded', () => { loadEvents(); initCalendar(); updateTicker(); renderUpcomingList(); });
 
-        // --- CONSTRUTOR DE TURMAS ---
         function openClassBuilder() { document.getElementById('class-builder-modal').classList.remove('hidden'); }
         function closeClassBuilder() { document.getElementById('class-builder-modal').classList.add('hidden'); }
-
         function loadTemplate() {
             const type = document.getElementById('builder-template').value;
-            if(courseTemplates[type]) {
-                currentSubjects = courseTemplates[type].map(subj => ({ date: '', name: subj, prof: '' }));
-                renderBuilderList();
-                // Nome sug.
-                const dayMap = {0:'DOM',1:'SEG',2:'TER',3:'QUA',4:'QUI',5:'SEX',6:'SAB'};
-                const today = new Date().getDay();
-                document.getElementById('builder-name').value = `${type.toUpperCase()} 2025`;
-            }
+            if(courseTemplates[type]) { currentSubjects = courseTemplates[type].map(s => ({ date: '', name: s, prof: '' })); renderBuilderList(); }
         }
-
         function renderBuilderList() {
-            const list = document.getElementById('builder-list');
-            list.innerHTML = '';
-            currentSubjects.forEach((subj, index) => {
-                list.innerHTML += `<tr class="group hover:bg-dark-800 transition"><td class="pl-4 text-gray-500 font-mono text-xs">${index + 1}</td><td><input type="date" value="${subj.date}" class="bg-transparent border-b border-transparent focus:border-neon-pink w-full outline-none text-gray-300 text-xs py-1 font-mono" onchange="updateSubjectData(${index}, 'date', this.value)"></td><td><input type="text" value="${subj.name}" class="bg-transparent border-b border-transparent focus:border-neon-cyan w-full outline-none text-white text-sm py-1" onchange="updateSubjectData(${index}, 'name', this.value)"></td><td><input type="text" value="${subj.prof}" placeholder="Prof." class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none text-gray-500 text-xs py-1 italic" onchange="updateSubjectData(${index}, 'prof', this.value)"></td><td class="text-center"><button onclick="removeSubjectRow(${index})" class="text-gray-600 hover:text-red-500"><i class="fas fa-times"></i></button></td></tr>`;
+            const list = document.getElementById('builder-list'); list.innerHTML = '';
+            currentSubjects.forEach((s, i) => { 
+                list.innerHTML += `<tr class="group hover:bg-dark-800 transition"><td class="pl-4 text-gray-500 text-xs">${i+1}</td><td><input type="date" value="${s.date}" class="bg-transparent w-full text-gray-300 text-xs" onchange="updateSubjectData(${i},'date',this.value)"></td><td><input type="text" value="${s.name}" class="bg-transparent w-full text-white text-sm" onchange="updateSubjectData(${i},'name',this.value)"></td><td><input type="text" value="${s.prof}" list="professores-list" placeholder="Prof." class="bg-transparent w-full text-gray-500 text-xs" onchange="updateSubjectData(${i},'prof',this.value)"></td><td class="text-center"><button onclick="removeSubjectRow(${i})" class="text-gray-600 hover:text-red-500"><i class="fas fa-times"></i></button></td></tr>`; 
             });
         }
-
-        function updateSubjectData(idx, field, val) { currentSubjects[idx][field] = val; }
+        function updateSubjectData(i, f, v) { currentSubjects[i][f] = v; }
         function addSubjectRow() { currentSubjects.push({ date: '', name: "Nova Aula", prof: '' }); renderBuilderList(); }
-        function removeSubjectRow(idx) { currentSubjects.splice(idx, 1); renderBuilderList(); }
+        function removeSubjectRow(i) { currentSubjects.splice(i, 1); renderBuilderList(); }
 
         function generateDates() {
-            const startVal = document.getElementById('builder-start').value;
-            const freq = document.getElementById('builder-freq').value;
-            if(!startVal) return showToast('Selecione data início', 'error');
-            let currentDate = new Date(startVal + 'T00:00:00');
-            currentSubjects.forEach((subj) => {
-                subj.date = currentDate.toISOString().split('T')[0];
-                if(freq === 'monthly') currentDate.setMonth(currentDate.getMonth() + 1);
-                else currentDate.setDate(currentDate.getDate() + 7);
+            const start = document.getElementById('builder-start').value; const freq = document.getElementById('builder-freq').value; const skip = document.getElementById('skip-holidays').checked;
+            if(!start) return showToast('Selecione data início', 'error');
+            let curr = new Date(start + 'T00:00:00');
+            currentSubjects.forEach(s => {
+                while(true) {
+                    const ds = curr.toISOString().split('T')[0];
+                    if (skip && HOLIDAYS_2025.includes(ds)) curr.setDate(curr.getDate() + 7); else { s.date = ds; break; }
+                }
+                if(freq==='monthly') curr.setMonth(curr.getMonth()+1); else curr.setDate(curr.getDate()+7);
             });
-            renderBuilderList();
-            showToast('Datas geradas!', 'success');
+            renderBuilderList(); showToast('Datas geradas!', 'success');
         }
 
-        // --- GERAÇÃO DE PDF CENTRALIZADA ---
-        function generatePDF(className, classTime, subjects) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(22); doc.setTextColor(0, 0, 0);
-            doc.text("Instituto Evolução Educacional - IEFE", 14, 20);
+        // --- PDFs (ALUNO & PROFESSOR) ---
+        function createPDF(type, className, classTime, subjects) {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFontSize(20); doc.text("Instituto Evolução Educacional - IEFE", 14, 20);
             doc.setLineWidth(0.5); doc.line(14, 25, 196, 25);
-            doc.setFontSize(14); doc.text("CRONOGRAMA DE AULAS", 14, 35);
-            doc.setFontSize(11); doc.setTextColor(80, 80, 80);
+            
+            const title = type === 'teacher' ? "DIÁRIO DE CLASSE (CONTROLE DOCENTE)" : "CRONOGRAMA DE AULAS";
+            doc.setFontSize(14); doc.text(title, 14, 35);
+            
+            doc.setFontSize(11); doc.setTextColor(80);
             doc.text(`TURMA: ${className.toUpperCase()}`, 14, 45);
             doc.text(`HORÁRIO: ${classTime.toUpperCase()}`, 14, 52);
 
-            const tableBody = subjects.map(s => [ s.date ? s.date.split('-').reverse().join('/') : 'A definir', s.name ]);
-            
-            doc.autoTable({
-                startY: 60,
-                head: [['DATA', 'DISCIPLINA / MÓDULO']],
-                body: tableBody,
-                theme: 'striped',
-                headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold' },
-                styles: { fontSize: 10, cellPadding: 4 },
-                columnStyles: { 0: { cellWidth: 50 } }
+            let head = [['DATA', 'DISCIPLINA']];
+            if(type === 'teacher') head = [['DATA', 'DISCIPLINA', 'PROFESSOR', 'ASSINATURA / CONTEÚDO']];
+
+            const body = subjects.map(s => {
+                const d = s.date ? s.date.split('-').reverse().join('/') : '--/--';
+                if(type === 'teacher') return [d, s.name, s.prof || '__________', ''];
+                return [d, s.name];
             });
 
-            doc.setFontSize(8);
-            doc.text(`Gerado em ${new Date().toLocaleDateString()}`, 14, doc.internal.pageSize.height - 10);
-            doc.save(`Cronograma_${className.replace(/\s+/g, '_')}.pdf`);
+            doc.autoTable({
+                startY: 60, head: head, body: body, theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 4, minCellHeight: type==='teacher'?15:8 }, // Mais espaço para assinatura
+                columnStyles: type==='teacher' ? { 3: { cellWidth: 60 } } : { 0: { cellWidth: 40 } }
+            });
+
+            doc.save(`${type === 'teacher' ? 'Diario' : 'Cronograma'}_${className.replace(/\s+/g, '_')}.pdf`);
         }
 
-        // Preview no Builder
-        function exportPreviewPDF() {
-            const name = document.getElementById('builder-name').value || "Turma";
-            const time = document.getElementById('builder-time').value || "A definir";
-            generatePDF(name, time, currentSubjects);
-            showToast('PDF Gerado!', 'success');
+        function exportSchedulePDF() {
+            createPDF('student', document.getElementById('builder-name').value||"Turma", document.getElementById('builder-time').value||"-", currentSubjects);
+            showToast('PDF Aluno Gerado!', 'success');
+        }
+        function exportTeacherPDF() {
+            createPDF('teacher', document.getElementById('builder-name').value||"Turma", document.getElementById('builder-time').value||"-", currentSubjects);
+            showToast('Diário Docente Gerado!', 'success');
         }
 
-        // Download da Agenda (Recuperado do Evento)
+        // Download via Modal (Recuperado)
+        function getEventClassData(cid) {
+            const evs = events.filter(e => e.extendedProps && e.extendedProps.classId === cid).sort((a,b)=>a.start.localeCompare(b.start));
+            if(!evs.length) return null;
+            const meta = evs[0].extendedProps;
+            const subjs = evs.map(e => ({ date: e.start, name: e.extendedProps.subjectName, prof: e.extendedProps.profName || '' }));
+            return { meta, subjs };
+        }
         function downloadClassPDF() {
-            const classId = document.getElementById('evt-class-id').value;
-            if(!classId) return;
-            
-            // Recupera todos os eventos dessa turma
-            const classEvents = events.filter(e => e.extendedProps && e.extendedProps.classId === classId);
-            if(classEvents.length === 0) return showToast('Erro ao recuperar turma', 'error');
-            
-            // Ordena por data
-            classEvents.sort((a,b) => a.start.localeCompare(b.start));
-            
-            const meta = classEvents[0].extendedProps; // Pega metadados do primeiro
-            const subjects = classEvents.map(e => ({
-                date: e.start,
-                name: e.extendedProps.subjectName || e.title
-            }));
-            
-            generatePDF(meta.className, meta.classTime, subjects);
-            showToast('PDF da turma baixado!', 'success');
+            const data = getEventClassData(document.getElementById('evt-class-id').value);
+            if(data) { createPDF('student', data.meta.className, data.meta.classTime, data.subjs); showToast('PDF Aluno baixado!', 'success'); }
+        }
+        function downloadTeacherPDF() {
+            const data = getEventClassData(document.getElementById('evt-class-id').value);
+            if(data) { createPDF('teacher', data.meta.className, data.meta.classTime, data.subjs); showToast('Diário Docente baixado!', 'success'); }
         }
 
         function saveClassToCalendar() {
-            const name = document.getElementById('builder-name').value;
-            const time = document.getElementById('builder-time').value;
-            const classId = 'CLASS-' + Date.now(); // ID Único para a turma
-
-            let count = 0;
-            currentSubjects.forEach(subj => {
-                if(subj.date) {
-                    const event = {
-                        id: String(Date.now() + Math.random()),
-                        title: `${name}: ${subj.name}`,
-                        start: subj.date,
-                        backgroundColor: '#00FF94',
-                        borderColor: '#00FF94',
-                        extendedProps: {
-                            classId: classId,       // VÍNCULO
-                            className: name,        // META
-                            classTime: time,        // META
-                            subjectName: subj.name  // NOME LIMPO
-                        }
-                    };
-                    events.push(event);
-                    calendar.addEvent(event);
-                    count++;
+            const name = document.getElementById('builder-name').value; const time = document.getElementById('builder-time').value; const cid = 'CLASS-'+Date.now();
+            currentSubjects.forEach(s => {
+                if(s.date) {
+                    events.push({ id: String(Date.now()+Math.random()), title: `${name}: ${s.name}`, start: s.date, backgroundColor: '#00FF94', borderColor: '#00FF94', 
+                    extendedProps: { classId:cid, className:name, classTime:time, subjectName:s.name, profName:s.prof } });
                 }
             });
-            saveEventsToStorage(); closeClassBuilder(); showToast(`${count} aulas criadas!`, 'success');
+            saveEventsToStorage(); closeClassBuilder(); showToast('Turma salva!','success'); location.reload();
         }
-        
-        // --- GESTÃO DE TURMAS (DELETE) ---
+
         function deleteEntireClass() {
-            const classId = document.getElementById('evt-class-id').value;
-            if(classId && confirm("ATENÇÃO: Isso apagará TODAS as aulas desta turma da agenda. Continuar?")) {
-                // Remove do array local
-                events = events.filter(e => !e.extendedProps || e.extendedProps.classId !== classId);
-                // Remove do calendário visual
-                calendar.getEvents().forEach(evt => {
-                    if(evt.extendedProps.classId === classId) evt.remove();
-                });
-                
-                saveEventsToStorage();
-                closeEventModal();
-                showToast('Turma completa excluída.', 'success');
+            const cid = document.getElementById('evt-class-id').value;
+            if(cid && confirm("APAGAR TODAS AS AULAS DESTA TURMA?")) {
+                events = events.filter(e => !e.extendedProps || e.extendedProps.classId !== cid);
+                saveEventsToStorage(); closeEventModal(); showToast('Turma excluída','success'); location.reload();
             }
         }
 
-        // --- AGENDA CORE ---
+        // AGENDA & FILTRO
         function initCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
-                locale: 'pt-br', buttonText: { today: 'Hoje', month: 'Mês', list: 'Lista' },
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth', locale: 'pt-br', headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
                 height: '100%', events: events,
-                dateClick: (i) => openEventModal(null, i.dateStr),
-                eventClick: (i) => openEventModal(i.event)
+                dateClick: i => openEventModal(null, i.dateStr), eventClick: i => openEventModal(i.event)
             });
             calendar.render();
         }
 
-        function loadEvents() { const d = localStorage.getItem(LS_KEY_AGENDA); if(d) events = JSON.parse(d); }
-        function saveEventsToStorage() { localStorage.setItem(LS_KEY_AGENDA, JSON.stringify(events)); updateTicker(); renderUpcomingList(); }
-        
+        function filterCalendar() {
+            const filter = document.getElementById('calendar-filter').value.toLowerCase();
+            if(filter === 'all') {
+                calendar.removeAllEvents();
+                calendar.addEventSource(events);
+            } else {
+                const filtered = events.filter(e => e.title.toLowerCase().includes(filter));
+                calendar.removeAllEvents();
+                calendar.addEventSource(filtered);
+            }
+        }
+
+        function loadEvents() { const d = localStorage.getItem(LS_KEY_AGENDA); if(d) { events = JSON.parse(d); allEventsCache = events; } }
+        function saveEventsToStorage() { localStorage.setItem(LS_KEY_AGENDA, JSON.stringify(events)); }
         function saveEvent() {
-            // Salvar evento único (não turma)
-            const id = document.getElementById('evt-id').value;
-            const title = document.getElementById('evt-title').value;
-            const date = document.getElementById('evt-date').value;
-            const color = document.getElementById('evt-color').value;
-            
-            if(!title) return;
-
-            if(id) {
-                const e = calendar.getEventById(id);
-                e.setProp('title',title); e.setStart(date); e.setProp('backgroundColor',color); e.setProp('borderColor',color);
-                const idx = events.findIndex(ev=>ev.id===id); 
-                if(idx>-1) {
-                    // Mantém props se existirem
-                    events[idx] = { ...events[idx], title, start:date, backgroundColor:color, borderColor:color };
-                }
-            } else {
-                const n = {id:String(Date.now()), title, start:date, backgroundColor:color, borderColor:color};
-                calendar.addEvent(n); events.push(n);
-            }
-            saveEventsToStorage(); closeEventModal(); showToast('Salvo','success');
+            const id=document.getElementById('evt-id').value, title=document.getElementById('evt-title').value, date=document.getElementById('evt-date').value, color=document.getElementById('evt-color').value;
+            if(id) { const idx=events.findIndex(e=>e.id===id); if(idx>-1) events[idx]={...events[idx], title, start:date, backgroundColor:color, borderColor:color}; }
+            else { events.push({id:String(Date.now()), title, start:date, backgroundColor:color, borderColor:color}); }
+            saveEventsToStorage(); closeEventModal(); showToast('Salvo','success'); location.reload();
         }
+        function deleteEvent() { const id=document.getElementById('evt-id').value; if(id&&confirm("Excluir?")){ events=events.filter(e=>e.id!==id); saveEventsToStorage(); closeEventModal(); showToast('Excluído','info'); location.reload(); } }
         
-        function deleteEvent() {
-            const id=document.getElementById('evt-id').value;
-            if(id && confirm('Excluir evento único?')) {
-                calendar.getEventById(id).remove();
-                events=events.filter(e=>e.id!==id);
-                saveEventsToStorage(); closeEventModal(); showToast('Excluído','info');
-            }
-        }
-
-        // --- UI & MODALS ---
         function openEventModal(e=null, d=null) {
-            const modal = document.getElementById('event-modal');
-            const classControls = document.getElementById('class-controls');
-            
-            document.getElementById('event-modal').classList.remove('hidden');
-            
-            if(e) {
-                // Editar
-                document.getElementById('modal-title').innerText = 'Detalhes';
-                document.getElementById('evt-id').value = e.id;
-                document.getElementById('evt-title').value = e.title;
-                document.getElementById('evt-date').value = e.startStr;
-                document.getElementById('evt-color').value = e.backgroundColor;
-                document.getElementById('btn-delete').classList.remove('hidden');
-                
-                // Verifica se é turma
-                if (e.extendedProps && e.extendedProps.classId) {
-                    classControls.classList.remove('hidden');
-                    document.getElementById('evt-class-id').value = e.extendedProps.classId;
-                    document.getElementById('class-info-text').innerText = `Turma: ${e.extendedProps.className}`;
-                } else {
-                    classControls.classList.add('hidden');
-                    document.getElementById('evt-class-id').value = '';
-                }
-
-            } else {
-                // Novo
-                document.getElementById('modal-title').innerText = 'Novo Agendamento';
-                document.getElementById('evt-id').value = '';
-                document.getElementById('evt-title').value = '';
-                document.getElementById('evt-date').value = d || '';
-                document.getElementById('btn-delete').classList.add('hidden');
-                classControls.classList.add('hidden');
+            document.getElementById('event-modal').classList.remove('hidden'); const c=document.getElementById('class-controls'), db=document.getElementById('btn-delete');
+            if(e){ 
+                document.getElementById('modal-title').innerText='Detalhes'; document.getElementById('evt-id').value=e.id; document.getElementById('evt-title').value=e.title; document.getElementById('evt-date').value=e.startStr; document.getElementById('evt-color').value=e.backgroundColor; db.classList.remove('hidden');
+                if(e.extendedProps&&e.extendedProps.classId){c.classList.remove('hidden');document.getElementById('evt-class-id').value=e.extendedProps.classId;document.getElementById('class-info-text').innerText=`Turma: ${e.extendedProps.className}`;}else{c.classList.add('hidden');}
+            } else { 
+                document.getElementById('modal-title').innerText='Novo'; document.getElementById('evt-id').value=''; document.getElementById('evt-title').value=''; document.getElementById('evt-date').value=d||''; c.classList.add('hidden'); db.classList.add('hidden'); 
             }
         }
-
-        // Helper para abrir via ID (Lista Recente)
-        window.openEventFromId = function(id) {
-            const event = calendar.getEventById(id);
-            if(event) openEventModal(event);
-        }
-
-        function renderUpcomingList() {
-            const list = document.getElementById('upcoming-list'); list.innerHTML = '';
-            const today = new Date().toISOString().split('T')[0];
-            const upcoming = events.filter(e => e.start >= today).sort((a,b) => a.start.localeCompare(b.start)).slice(0, 10);
-            if(upcoming.length === 0) list.innerHTML = '<p class="text-center text-gray-500 text-xs mt-4">Vazio.</p>';
-            upcoming.forEach(e => {
-                const d = e.start.split('-');
-                list.innerHTML += `
-                <div onclick="openEventFromId('${e.id}')" class="flex items-center justify-between p-2 bg-dark-900 rounded border border-dark-600 cursor-pointer hover:border-neon-cyan transition">
-                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background-color:${e.backgroundColor}"></div><span class="text-xs text-white truncate w-40 font-bold">${e.title}</span></div>
-                    <span class="text-[10px] text-gray-500">${d[2]}/${d[1]}</span>
-                </div>`;
-            });
-        }
-
-        function updateTicker() { /* ... */ }
         function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
-        function showToast(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-pink text-neon-pink'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
+        function renderUpcomingList() {
+            const list=document.getElementById('upcoming-list'); list.innerHTML=''; const today=new Date().toISOString().split('T')[0]; const up=events.filter(e=>e.start>=today).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,10);
+            if(!up.length) list.innerHTML='<p class="text-xs text-gray-500 text-center mt-4">Vazio.</p>';
+            up.forEach(e=>{ list.innerHTML+=`<div onclick="openEventFromId('${e.id}')" class="flex justify-between p-2 bg-dark-900 rounded border border-dark-600 cursor-pointer hover:border-neon-cyan"><span class="text-xs text-white truncate w-40 font-bold">${e.title}</span><span class="text-[10px] text-gray-500">${e.start.split('-').reverse().join('/')}</span></div>`; });
+        }
+        window.openEventFromId = id => { const e = calendar.getEventById(id); if(e) openEventModal(e); };
+        function updateTicker() {} 
+        function showToast(m, t='info') { const c=document.getElementById('toast-container'); const el=document.createElement('div'); el.className=`bg-dark-800 border-l-4 border-${t==='success'?'green':(t==='error'?'red':'pink')}-500 text-white px-4 py-2 rounded shadow-lg mb-2 animate-[fadeIn_0.3s]`; el.innerText=m; c.appendChild(el); setTimeout(()=>el.remove(),3000); }
     </script>
 </body>
 </html>

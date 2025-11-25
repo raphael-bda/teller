@@ -459,5 +459,40 @@
         function loadToCalc(v) { switchTab('pix'); const fs=v.toFixed(2); const f=`R$ ${new Intl.NumberFormat('pt-BR').format(fs)}`; document.getElementById('pix-total').value=f; document.getElementById('boleto-total').value=f; calcPix(); showToast('Carregado', 'info'); }
         function showToast(msg,type='info'){const t=document.createElement('div'); const c=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-cyan text-neon-cyan'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${c} text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transform translate-x-full transition-all duration-300 min-w-[200px]`; t.innerHTML=`<i class="fas ${type==='success'?'fa-check':'fa-info'}"></i><span class="text-sm font-bold">${msg}</span>`; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.classList.remove('translate-x-full'),10); setTimeout(()=>{t.classList.add('translate-x-full','opacity-0');setTimeout(()=>t.remove(),300)},3000); }
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Verifica se há um comando de voz pendente vindo do main.js
+        const voiceParams = localStorage.getItem('ODIN_VOICE_PARAMS');
+        
+        if (voiceParams) {
+            const params = JSON.parse(voiceParams);
+            
+            if (params.type === 'calc_pix') {
+                // Preenche os campos
+                switchTab('pix');
+                
+                // Formata para Real (Ex: 5000 -> R$ 5.000,00)
+                const valFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(params.value);
+                document.getElementById('pix-total').value = valFormatted;
+                
+                document.getElementById('pix-slider').value = params.discount;
+                
+                // Executa o cálculo
+                calcPix();
+                
+                // Feedback de Áudio
+                const result = document.getElementById('pix-val-final').innerText;
+                // Pequeno delay para garantir que a voz do navegador carregou
+                setTimeout(() => {
+                    if(window.speak) window.speak(`Cálculo realizado. O valor final com desconto é ${result}.`);
+                }, 1000);
+                
+                // Limpa o comando para não repetir ao recarregar
+                localStorage.removeItem('ODIN_VOICE_PARAMS');
+            }
+        }
+    });
+</script>
 </body>
 </html>
