@@ -16,21 +16,96 @@
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .glass-panel { @apply bg-dark-800/60 backdrop-blur-xl border border-dark-700 shadow-lg; }
-            .input-tech { @apply w-full bg-dark-900 border border-dark-600 rounded p-3 text-white font-mono focus:border-neon-pink focus:shadow-[0_0_10px_rgba(255,0,128,0.2)] outline-none transition-all placeholder-gray-600 text-sm; }
-            .fc { @apply font-sans text-gray-300; --fc-border-color: #1A1A23; --fc-today-bg-color: rgba(255, 158, 11, 0.1); }
-            .fc-toolbar-title { @apply text-white uppercase tracking-widest text-sm font-bold !important; }
-            .fc-button { @apply bg-dark-700 border-dark-600 text-xs uppercase font-bold hover:bg-neon-pink hover:text-white transition !important; }
-            .fc-button-active { @apply bg-neon-pink border-neon-pink text-white !important; }
-            .table-builder th { @apply text-[10px] uppercase text-gray-500 font-bold pb-2 border-b border-dark-700; }
-            .table-builder td { @apply py-2 border-b border-dark-800; }
-            .lifecycle-bar { @apply h-2 bg-dark-900 rounded-full overflow-hidden; }
-            .lifecycle-fill { @apply h-full bg-neon-cyan transition-all duration-1000; }
-        }
-        body { @apply bg-dark-900 text-gray-300; }
-    </style>
+        <style>
+    /* Converted Tailwind @apply rules to standard CSS to avoid unknown at-rule errors */
+    .glass-panel {
+      background-color: rgba(14, 14, 18, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid #1A1A23;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
+    }
+    
+    .input-tech {
+      width: 100%;
+      background-color: #050507;
+      border: 1px solid #2A2A35;
+      border-radius: 0.25rem;
+      padding: 0.75rem;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .input-tech::placeholder { color: #6B7280; }
+    .input-tech:focus {
+      border-color: #FF0080;
+      box-shadow: 0 0 10px rgba(255,0,128,0.2);
+      outline: none;
+    }
+    
+    .fc {
+      font-family: 'Inter', sans-serif;
+      color: #D1D5DB;
+      --fc-border-color: #1A1A23;
+      --fc-today-bg-color: rgba(255, 158, 11, 0.1);
+    }
+    .fc-toolbar-title {
+      color: #ffffff !important;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.875rem;
+      font-weight: 700 !important;
+    }
+    .fc-button {
+      background-color: #1A1A23;
+      border: 1px solid #2A2A35;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      transition: all 0.2s ease !important;
+    }
+    .fc-button:hover {
+      background-color: #FF0080;
+      color: #ffffff;
+    }
+    .fc-button-active {
+      background-color: #FF0080 !important;
+      border-color: #FF0080 !important;
+      color: #ffffff !important;
+    }
+    
+    .table-builder th {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #6B7280;
+      font-weight: 700;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #1A1A23;
+    }
+    .table-builder td {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #0E0E12;
+    }
+    
+    .lifecycle-bar {
+      height: 0.5rem;
+      background-color: #050507;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .lifecycle-fill {
+      height: 100%;
+      background-color: #00F0FF;
+      transition: width 1s ease;
+    }
+    
+    body {
+      background-color: #050507;
+      color: #D1D5DB;
+    }
+        </style>
 </head>
 <body class="flex flex-col min-h-screen">
     
