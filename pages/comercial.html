@@ -16,49 +16,55 @@
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, animation: { 'marquee': 'marquee 30s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
-    <style type="text/css">
-        /* Replacements for Tailwind @apply utilities to avoid unknown at-rule errors in editors */
+    <style>
+        /* Converted Tailwind @apply utilities to plain CSS to avoid unknown @apply errors */
         .glass-panel {
-            background: rgba(15,15,20,0.6);
+            background-color: rgba(14, 14, 18, 0.6); /* approximates bg-dark-800/60 */
             backdrop-filter: blur(12px);
-            border: 1px solid #1a1a23;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #1A1A23; /* border-dark-700 */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+            border-radius: 0.75rem;
         }
         .input-tech {
             width: 100%;
-            background: #0b0b0d;
-            border: 1px solid #2a2a35;
+            background: #050507; /* bg-dark-900 */
+            border: 1px solid #2A2A35; /* border-dark-600 */
             border-radius: 0.5rem;
             padding: 0.75rem;
             color: #ffffff;
             font-family: 'JetBrains Mono', monospace;
             outline: none;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             font-size: 0.875rem;
         }
+        .input-tech::placeholder {
+            color: #6B7280; /* placeholder-gray-600 */
+        }
         .input-tech:focus {
-            border-color: #00FF94;
+            border-color: #00FF94; /* neon-green */
             box-shadow: 0 0 10px rgba(0,255,148,0.2);
         }
-        .input-tech::placeholder { color: #9ca3af; }
-
         .tab-active {
-            background: #00FF94;
-            color: #050507;
+            background: #00FF94; /* neon-green */
+            color: #050507; /* dark-900 */
             font-weight: 700;
             box-shadow: 0 0 15px rgba(0,255,148,0.4);
-            border-color: #00FF94;
+            border: 1px solid #00FF94;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
         }
         .tab-inactive {
-            background: #0b0b0d;
-            color: #9ca3af;
-            border: 1px solid #2a2a35;
+            background: #050507; /* dark-900 */
+            color: #9CA3AF; /* gray-400 */
+            border: 1px solid #2A2A35;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
         }
         .tab-inactive:hover {
             color: #ffffff;
-            border-color: #9ca3af;
+            border-color: #9CA3AF;
         }
-
         .btn-link-hub {
             display: flex;
             align-items: center;
@@ -66,30 +72,37 @@
             width: 100%;
             padding: 0.75rem;
             border-radius: 0.5rem;
-            background: #0b0b0d;
-            border: 1px solid #2a2a35;
-            transition: all 0.15s ease;
+            background: #050507; /* dark-900 */
+            border: 1px solid #2A2A35;
+            transition: all 0.15s;
             font-size: 0.75rem;
             text-align: left;
             height: 100%;
         }
-        .btn-link-hub:hover { background: #111216; }
-
+        .btn-link-hub:hover {
+            border-color: #00F0FF; /* neon-cyan */
+            background: #0E0E12; /* dark-800 */
+        }
         .btn-link-icon {
             width: 1.5rem;
             height: 1.5rem;
             border-radius: 0.375rem;
-            background: #15151a;
+            background: #0E0E12; /* dark-800 */
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ca3af;
+            color: #9CA3AF; /* text-gray-400 */
             margin-left: 0.5rem;
-            transition: all 0.15s ease;
+            transition: all 0.15s;
         }
-        .btn-link-hub:hover .btn-link-icon { color: #00F0FF; background: #17171b; }
-
-        body { background-color: #0b0b0d; color: #d1d5db; }
+        .btn-link-hub:hover .btn-link-icon {
+            color: #00F0FF;
+            background: #1A1A23; /* dark-700 */
+        }
+        body {
+            background: #050507; /* bg-dark-900 */
+            color: #D1D5DB; /* text-gray-300 */
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -184,10 +197,12 @@
             </div>
 
             <div class="lg:col-span-7 space-y-6 order-1 lg:order-2">
-                <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row gap-3 items-end border-l-4 border-neon-green">
+                <div class="glass-panel p-4 rounded-xl flex flex-col md:flex-row gap-3 items-end border-l-4 border-neon-green relative">
+                    <div class="absolute top-2 right-2 text-neon-green/20 text-xs font-bold uppercase tracking-wider"><i class="fas fa-microphone"></i> Voz Ativa</div>
+                    
                     <div class="flex-grow w-full"><label class="text-[10px] text-gray-500 uppercase font-bold ml-1">Novo Lead</label><input type="text" id="lead-name" class="input-tech" placeholder="Nome do Interessado"></div>
                     <div class="w-full md:w-1/3"><label class="text-[10px] text-gray-500 uppercase font-bold ml-1">Status</label><select id="lead-status" class="input-tech cursor-pointer"><option value="novo">Novo Contato</option><option value="negociacao">Em Negociação</option><option value="posvenda">Pós-Venda</option></select></div>
-                    <button onclick="addLead()" class="w-full md:w-auto bg-neon-green text-dark-900 font-bold py-3 px-6 rounded hover:bg-white transition shadow-lg shadow-neon-green/20 whitespace-nowrap text-sm uppercase tracking-widest"><i class="fas fa-plus mr-2"></i> Add</button>
+                    <button onclick="addLead()" class="w-full md:w-auto bg-neon-green text-dark-900 font-bold py-3 px-6 rounded hover:bg-white transition uppercase text-xs tracking-widest"><i class="fas fa-plus mr-2"></i> Add</button>
                 </div>
 
                 <div class="glass-panel rounded-xl overflow-hidden flex flex-col h-[600px]">
@@ -216,7 +231,30 @@
         let leads = [];
         const LS_KEY_CRM = 'ODIN_CRM_LEADS';
 
-        // Expondo funções para o escopo global (window) para o onclick funcionar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeads();
+            switchTool('hub');
+            
+            ['cont-nome','cont-cpf','cont-curso'].forEach(id=>document.getElementById(id).addEventListener('input', updateContractPreview));
+            document.getElementById('cont-valor').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if(value) { value = (parseInt(value,10)/100).toFixed(2); e.target.value = new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'}).format(value); }
+            });
+
+            // --- LISTENER DE VOZ (Recepção do Comando) ---
+            const voiceParams = localStorage.getItem('ODIN_VOICE_PARAMS');
+            if (voiceParams) {
+                const params = JSON.parse(voiceParams);
+                if (params.type === 'add_lead') {
+                    // Preenche e Salva Automaticamente
+                    document.getElementById('lead-name').value = params.name;
+                    addLead();
+                    localStorage.removeItem('ODIN_VOICE_PARAMS');
+                }
+            }
+        });
+
+        // Expondo funções para o escopo global (window)
         window.switchTool = function(tool) {
             ['hub', 'link', 'contratos', 'scripts'].forEach(t => {
                 document.getElementById(`tool-${t}`).classList.add('hidden');
@@ -257,9 +295,6 @@
             if(status === 'posvenda') triggerConfetti();
             saveLeads();
             showToast('Lead cadastrado!', 'success');
-            
-            // Feedback de Voz (Se habilitado)
-            if(window.speak) window.speak("Lead cadastrado com sucesso.");
         };
 
         window.deleteLead = function(id) {
@@ -276,7 +311,6 @@
             }
         };
 
-        // Funções Internas
         function loadLeads() {
             const data = localStorage.getItem(LS_KEY_CRM);
             if(data) leads = JSON.parse(data);
@@ -316,9 +350,9 @@
                         <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end mt-3 md:mt-0">
                             <span class="text-[10px] bg-${color}-500/10 text-${color}-400 px-2 py-1 rounded border border-${color}-500/20 font-bold uppercase">${label}</span>
                             <div class="flex gap-2">
-                                <button class="w-8 h-8 rounded bg-dark-800 border border-dark-600 text-gray-400 hover:text-neon-green transition" onclick="generateWalink()"><i class="fab fa-whatsapp"></i></button>
+                                <button class="w-8 h-8 rounded bg-dark-800 border border-dark-600 text-gray-400 hover:text-neon-green transition" onclick="generateWalink()" title="WhatsApp"><i class="fab fa-whatsapp"></i></button>
                                 ${nextAction}
-                                <button class="w-8 h-8 rounded bg-dark-800 border border-dark-600 text-gray-400 hover:text-red-500 transition" onclick="deleteLead(${lead.id})"><i class="fas fa-trash"></i></button>
+                                <button class="w-8 h-8 rounded bg-dark-800 border border-dark-600 text-gray-400 hover:text-red-500 transition" onclick="deleteLead(${lead.id})" title="Excluir"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`;
                     list.appendChild(card);
@@ -353,23 +387,6 @@
         function showToast(msg, type='info') { const c=document.getElementById('toast-container'), t=document.createElement('div'), cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-cyan text-neon-cyan'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
         
         function triggerConfetti() { if(typeof confetti==='function'){ confetti({particleCount:100,spread:70,origin:{y:0.6}}); } }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLeads();
-            switchTool('hub');
-            ['cont-nome','cont-cpf','cont-curso'].forEach(id=>document.getElementById(id).addEventListener('input', updateContractPreview));
-            
-            // INTEGRACAO DE VOZ: Verifica se veio comando do Main.js
-            const voiceParams = localStorage.getItem('ODIN_VOICE_PARAMS');
-            if (voiceParams) {
-                const params = JSON.parse(voiceParams);
-                if (params.type === 'add_lead') {
-                    document.getElementById('lead-name').value = params.name;
-                    addLead();
-                    localStorage.removeItem('ODIN_VOICE_PARAMS');
-                }
-            }
-        });
     </script>
 </body>
 </html>
