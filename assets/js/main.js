@@ -72,58 +72,62 @@ function validatePasswordStrength(p) {
     return /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.{8,})/.test(p); 
 }
 
-// --- AUTH LISTENER (COM TRAVA DE SEGURANÇA) ---
+// --- AUTH LISTENER (Gerencia Login Automático e Bloqueio) ---
 function initAuthListener() {
     auth.onAuthStateChanged(async (user) => {
         const userArea = document.getElementById('user-area');
         const mobileUserArea = document.getElementById('mobile-user-area');
         
+        // Se o DOM ainda não carregou, tenta de novo em breve
         if (!userArea) { setTimeout(initAuthListener, 100); return; }
 
         if (user) {
-            // USUÁRIO LOGADO: Libera acesso
-            if (!user.emailVerified) window.showToast("Verifique seu email.", "warning");
-
-            let displayName = user.displayName || "Operador";
-            let photoURL = user.photoURL || `${basePath}/assets/img/odin-logo.png`;
-            let userRole = "Vendedor";
-
-            if (db) {
-                try {
-                    const doc = await db.collection('users').doc(user.uid).get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        displayName = data.name || displayName;
-                        userRole = data.role || userRole;
-                    }
-                } catch (e) {}
-            }
-
-            localStorage.setItem('ODIN_USER_NAME', displayName);
-            localStorage.setItem('ODIN_USER_PHOTO', photoURL);
-
-            // Garante que os modais sumam
+            // === USUÁRIO LOGADO (Cadastrado ou Login feito) ===
+            // Libera o acesso imediatamente.
+            
+            // Fecha modais de bloqueio se estiverem abertos
             document.getElementById('login-modal')?.classList.add('hidden');
             document.getElementById('register-modal')?.classList.add('hidden');
 
-            // Renderiza Header Logado
+            let displayName = user.displayName || "Operador";
+            let photoURL = user.photoURL || `${basePath}/assets/img/odin-logo.png`;
+            let userRole = "Vendedor"; // Padrão visual inicial
+
+            // Busca dados reais no banco (assíncrono, não bloqueia a UI)
+            if (db) {
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        // Atualiza a UI se os dados carregarem
+                        if(data.name) document.querySelectorAll('.user-name-display').forEach(el => el.innerText = data.name);
+                        if(data.role) document.querySelectorAll('.user-role-display').forEach(el => el.innerText = data.role);
+                    }
+                }).catch(e => console.log("Perfil não carregado ainda", e));
+            }
+
+            // Salva cache local para acesso rápido
+            localStorage.setItem('ODIN_USER_NAME', displayName);
+            localStorage.setItem('ODIN_USER_PHOTO', photoURL);
+
+            // Renderiza Header Logado (Desktop)
             const desktopHtml = `
                 <div class="text-right hidden md:block cursor-pointer group" onclick="openConfigModal()">
-                    <p class="text-white text-xs font-bold group-hover:text-neon-cyan transition leading-tight truncate max-w-[120px]">${displayName}</p>
-                    <p class="text-gray-500 text-[9px] font-mono tracking-wider text-neon-green uppercase">${userRole}</p>
+                    <p class="text-white text-xs font-bold group-hover:text-neon-cyan transition leading-tight truncate max-w-[120px] user-name-display">${displayName}</p>
+                    <p class="text-gray-500 text-[9px] font-mono tracking-wider text-neon-green uppercase user-role-display">${userRole}</p>
                 </div>
                 <div class="relative group cursor-pointer" onclick="openConfigModal()">
                     <img src="${photoURL}" class="w-8 h-8 rounded-lg border border-dark-600 shadow-inner group-hover:border-neon-cyan transition-all object-cover">
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 ${user.emailVerified ? 'bg-neon-green' : 'bg-yellow-500'} border-2 border-dark-900 rounded-full animate-pulse"></div>
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-neon-green border-2 border-dark-900 rounded-full animate-pulse"></div>
                 </div>`;
             
+            // Renderiza Menu Logado (Mobile)
             const mobileHtml = `
                 <div class="flex items-center gap-3 p-4 bg-dark-800 rounded-xl border border-dark-700 shadow-lg" onclick="openConfigModal()">
                     <img src="${photoURL}" class="w-12 h-12 rounded-full border-2 border-neon-cyan object-cover">
                     <div>
-                        <p class="text-white font-bold text-sm leading-tight mb-0.5">${displayName}</p>
+                        <p class="text-white font-bold text-sm leading-tight mb-0.5 user-name-display">${displayName}</p>
                         <p class="text-neon-green text-[10px] font-mono tracking-widest uppercase flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 ${user.emailVerified ? 'bg-neon-green' : 'bg-yellow-500'} rounded-full"></span> ${userRole}
+                            <span class="w-1.5 h-1.5 bg-neon-green rounded-full"></span> <span class="user-role-display">${userRole}</span>
                         </p>
                     </div>
                     <button class="ml-auto w-8 h-8 flex items-center justify-center rounded-full bg-dark-700 text-gray-400"><i class="fas fa-cog text-xs"></i></button>
@@ -133,33 +137,18 @@ function initAuthListener() {
             if(mobileUserArea) mobileUserArea.innerHTML = mobileHtml;
 
         } else { 
-            // USUÁRIO DESLOGADO: Bloqueia tudo
+            // === USUÁRIO DESLOGADO: BLOQUEIA TUDO ===
             renderLoginButtons(); 
             localStorage.setItem('ODIN_USER_NAME', 'Visitante'); 
             
-            // Força a abertura do Modal de Cadastro
+            // Abre modal e remove botão de fechar
             openRegisterModal();
-
-            // REMOVE OS BOTÕES "X" FORÇADAMENTE
-            // Usamos um pequeno timeout para garantir que o DOM foi criado
             setTimeout(() => {
                 const closeLogin = document.getElementById('btn-close-login');
                 const closeReg = document.getElementById('btn-close-reg');
-                
                 if(closeLogin) closeLogin.style.display = 'none';
                 if(closeReg) closeReg.style.display = 'none';
             }, 100);
-            
-            // Backup: Loop de segurança (para casos de reload lento)
-            const lockInterval = setInterval(() => {
-                const closeLogin = document.getElementById('btn-close-login');
-                const closeReg = document.getElementById('btn-close-reg');
-                if(closeLogin && closeReg) {
-                    closeLogin.style.display = 'none';
-                    closeReg.style.display = 'none';
-                    clearInterval(lockInterval);
-                }
-            }, 500);
         }
     });
 }
@@ -199,14 +188,12 @@ function setFavicon() {
 function loadHeader() {
     const path = window.location.pathname;
     const page = path.split("/").pop() || 'index.html';
-    
     const getNavClass = (name) => page.includes(name) ? 'text-white bg-white/10 border-white/20 shadow-inner' : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent';
     const getMobClass = (name, color) => page.includes(name) ? `bg-${color}/20 text-${color} border-${color}/50 font-bold` : `bg-dark-800 text-gray-400 border-dark-700 hover:text-white`;
     const getToolClass = () => page.includes('ferr_') ? 'text-neon-orange border-white/10 bg-white/5' : 'text-gray-400 border-transparent hover:text-white';
 
     const headerHTML = `
     <div id="auth-modals-container"></div>
-
     <div id="config-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[250] hidden flex items-center justify-center p-4 animate-[fadeIn_0.2s]">
         <div class="bg-dark-800 border border-dark-600 rounded-2xl w-full max-w-sm p-6 relative shadow-2xl">
             <button onclick="closeConfigModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fas fa-times"></i></button>
@@ -223,7 +210,6 @@ function loadHeader() {
             </div>
         </div>
     </div>
-
     <div id="terms-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[300] hidden flex items-center justify-center p-4 animate-[fadeIn_0.2s]">
         <div class="bg-dark-900 border border-dark-600 rounded-xl w-full max-w-2xl h-[80vh] flex flex-col relative shadow-2xl">
             <div class="p-4 border-b border-dark-700 flex justify-between items-center">
@@ -241,15 +227,12 @@ function loadHeader() {
             </div>
         </div>
     </div>
-
     <header class="fixed w-full top-0 z-[100] bg-dark-900/95 backdrop-blur-md border-b border-dark-700 h-16 lg:h-20 flex items-center">
         <nav class="container mx-auto px-4 lg:px-6 h-full grid grid-cols-[auto_1fr_auto] items-center gap-4">
-            
             <a href="${basePath}/index.html" class="flex items-center gap-3 z-50">
                 <img src="${basePath}/assets/img/odin-logo.png" class="w-8 h-8 lg:w-10 lg:h-10 rounded-full shadow-lg border border-dark-600">
                 <span class="text-white font-black tracking-widest text-lg lg:text-xl hidden md:block group-hover:text-neon-cyan transition">ODIN</span>
             </a>
-
             <div class="hidden lg:flex justify-center">
                 <div class="flex items-center bg-dark-800/50 border border-dark-600 rounded-full p-1 shadow-xl gap-1">
                     <a href="${pagesPath}/secretaria.html" class="px-4 py-1.5 rounded-full text-xs font-bold transition border ${getNavClass('secretaria')}">Secretaria</a>
@@ -268,7 +251,6 @@ function loadHeader() {
                     </div>
                 </div>
             </div>
-
             <div class="flex items-center justify-end gap-3">
                 <div class="hidden lg:flex items-center gap-2">
                     <button onclick="toggleVoice()" class="w-8 h-8 flex items-center justify-center rounded bg-dark-800 text-gray-400 hover:text-white border border-dark-600 transition"><i id="mic-icon" class="fas fa-microphone text-xs"></i></button>
@@ -279,7 +261,6 @@ function loadHeader() {
                 <button id="mobile-menu-btn" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-dark-800 text-white border border-dark-600 hover:border-neon-cyan transition z-50"><i class="fas fa-bars"></i></button>
             </div>
         </nav>
-
         <div id="mobile-menu" class="fixed inset-0 w-full h-[100dvh] bg-dark-900 z-[200] transform translate-x-full transition-transform duration-300 flex flex-col overflow-y-auto">
             <div class="px-6 h-16 flex items-center justify-between border-b border-dark-800 flex-none bg-dark-900 sticky top-0 z-[210]">
                 <span class="text-white font-black text-xl tracking-widest flex items-center gap-3"><img src="${basePath}/assets/img/odin-logo.png" class="w-8 h-8 rounded-full border border-dark-600"> ODIN OS</span>
@@ -343,10 +324,11 @@ window.toggleNotifications = () => { /* ... */ };
 window.backupData = () => { /* ... */ };
 window.restoreData = (i) => { /* ... */ };
 
-// --- AUTH LOGIC (COM IDS PARA HIDE) ---
+// --- AUTH LOGIC (Processos de Login/Cadastro) ---
 function injectAuthModals() {
     if (document.getElementById('login-modal')) return;
 
+    // Login Modal (Com ID btn-close-login)
     const loginHtml = `
     <div id="login-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[200] hidden flex items-center justify-center p-4">
         <div class="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-sm p-8 relative shadow-2xl">
@@ -362,7 +344,7 @@ function injectAuthModals() {
         </div>
     </div>`;
 
-    // Register (Sem Close Button se forçado, mas aqui colocamos com ID)
+    // Register Modal (Com ID btn-close-reg e Termos)
     const registerHtml = `
     <div id="register-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[200] hidden flex items-center justify-center p-4">
         <div class="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-md p-8 relative shadow-2xl h-auto max-h-[90vh] overflow-y-auto custom-scroll">
