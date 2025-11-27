@@ -10,43 +10,36 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, backgroundImage: { 'grid-pattern': "linear-gradient(to right, #1A1A23 1px, transparent 1px), linear-gradient(to bottom, #1A1A23 1px, transparent 1px)", } } } }
     </script>
     <style>
-        /* Converted Tailwind @apply rules to plain CSS to avoid unknown at-rule errors */
-
-        /* Color references from the original Tailwind config:
-           dark-900: #050507
-           dark-800: #0E0E12
-           dark-700: #1A1A23
-           neon-cyan: #00F0FF
-        */
-
         .glass-panel {
-            background-color: rgba(14, 14, 18, 0.6); /* bg-dark-800/60 */
+            background-color: rgba(14, 14, 18, 0.6);
             -webkit-backdrop-filter: blur(16px);
-            backdrop-filter: blur(16px); /* backdrop-blur-xl */
-            border: 1px solid #1A1A23; /* border-dark-700 */
-            transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; /* transition-all duration-300 */
+            backdrop-filter: blur(16px);
+            border: 1px solid #1A1A23;
+            transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .glass-panel:hover {
-            border-color: rgba(0, 240, 255, 0.3); /* hover:border-neon-cyan/30 */
+            border-color: rgba(0, 240, 255, 0.3);
         }
-
         body {
-            background-color: #050507; /* bg-dark-900 */
-            color: #D1D5DB; /* text-gray-300 */
-            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; /* font-sans */
+            background-color: #050507;
+            color: #D1D5DB;
+            font-family: Inter, system-ui, sans-serif;
         }
-        body::selection {
-            background-color: #00F0FF; /* selection:bg-neon-cyan */
-            color: #050507; /* selection:text-dark-900 */
+        /* Animação suave para atualização de números */
+        .fade-update {
+            animation: flashUpdate 0.5s ease-out;
         }
-
-        .bg-grid {
-            background-size: 40px 40px;
+        @keyframes flashUpdate {
+            0% { color: white; transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -60,7 +53,7 @@
         <div class="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-dark-700 pb-6 gap-6">
             <div>
                 <div class="flex items-center gap-2 text-neon-cyan mb-2 font-mono text-xs tracking-widest uppercase">
-                    <div class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div> Odin System v11.0
+                    <div class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div> Odin System v22.0
                 </div>
                 <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
                     Visão Geral <span class="text-dark-700">/</span> Odin
@@ -75,56 +68,56 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
             
-            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-cyan">
-                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition"><i class="fas fa-users"></i></div>
-                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Leads Totais</p>
-                <h3 class="text-3xl font-mono font-bold text-white group-hover:text-neon-cyan transition" id="kpi-leads">0</h3>
-                <p class="text-xs text-neon-cyan mt-2 flex items-center">Funil Comercial</p>
+            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-green border border-transparent transition-all">
+                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition text-neon-green"><i class="fas fa-users"></i></div>
+                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Leads Ativos</p>
+                <h3 class="text-3xl font-mono font-bold text-white group-hover:text-neon-green transition" id="kpi-leads">0</h3>
+                <p class="text-[10px] text-neon-green mt-2 flex items-center uppercase tracking-widest font-bold"><i class="fas fa-rocket mr-2"></i> Comercial</p>
             </div>
 
-            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-violet">
-                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition"><i class="fas fa-folder-open"></i></div>
-                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Protocolos Abertos</p>
+            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-violet border border-transparent transition-all">
+                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition text-neon-violet"><i class="fas fa-folder-open"></i></div>
+                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Protocolos Pendentes</p>
                 <h3 class="text-3xl font-mono font-bold text-white group-hover:text-neon-violet transition" id="kpi-reqs">0</h3>
-                <p class="text-xs text-neon-violet mt-2">Secretaria</p>
+                <p class="text-[10px] text-neon-violet mt-2 flex items-center uppercase tracking-widest font-bold"><i class="fas fa-stamp mr-2"></i> Secretaria</p>
             </div>
 
-            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-green">
-                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-cyan border border-transparent transition-all">
+                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition text-neon-cyan"><i class="fas fa-wallet"></i></div>
                 <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Total Recuperado</p>
-                <h3 class="text-2xl md:text-3xl font-mono font-bold text-white group-hover:text-neon-green transition" id="kpi-finance">R$ 0,00</h3>
-                <p class="text-xs text-neon-green mt-2 flex items-center">Financeiro</p>
+                <h3 class="text-2xl md:text-3xl font-mono font-bold text-white group-hover:text-neon-cyan transition" id="kpi-finance">R$ 0,00</h3>
+                <p class="text-[10px] text-neon-cyan mt-2 flex items-center uppercase tracking-widest font-bold"><i class="fas fa-chart-line mr-2"></i> Financeiro</p>
             </div>
 
-            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-pink">
-                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition"><i class="fas fa-brain"></i></div>
-                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Alunos Monitorados</p>
+            <div class="glass-panel p-6 rounded-lg relative overflow-hidden group hover:border-neon-pink border border-transparent transition-all">
+                <div class="absolute right-0 top-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition text-neon-pink"><i class="fas fa-brain"></i></div>
+                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Aulas/Eventos</p>
                 <h3 class="text-3xl font-mono font-bold text-white group-hover:text-neon-pink transition" id="kpi-students">0</h3>
-                <p class="text-xs text-neon-pink mt-2 flex items-center">Pedagógico</p>
+                <p class="text-[10px] text-neon-pink mt-2 flex items-center uppercase tracking-widest font-bold"><i class="fas fa-graduation-cap mr-2"></i> Pedagógico</p>
             </div>
         </div>
         
         <h2 class="text-xl font-bold text-white mb-6 flex items-center"><i class="fas fa-layer-group text-neon-violet mr-3"></i> Acesso Rápido</h2>
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            <a href="pages/secretaria.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-white flex items-center gap-4">
-                <div class="bg-dark-700 p-3 rounded text-white"><i class="fas fa-folder-open"></i></div>
-                <div><h3 class="font-bold text-white">Secretaria</h3><p class="text-xs text-gray-500">Documentos e Processos</p></div>
+            <a href="pages/secretaria.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-violet flex items-center gap-4 group">
+                <div class="bg-neon-violet/10 p-3 rounded text-neon-violet group-hover:scale-110 transition"><i class="fas fa-folder-open"></i></div>
+                <div><h3 class="font-bold text-white group-hover:text-neon-violet transition">Secretaria</h3><p class="text-xs text-gray-500">Documentos e Processos</p></div>
             </a>
-            <a href="pages/financeiro.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-cyan flex items-center gap-4">
-                <div class="bg-neon-cyan/10 p-3 rounded text-neon-cyan"><i class="fas fa-wallet"></i></div>
-                <div><h3 class="font-bold text-white">Financeiro</h3><p class="text-xs text-gray-500">Cobrança e Negociação</p></div>
+            <a href="pages/financeiro.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-cyan flex items-center gap-4 group">
+                <div class="bg-neon-cyan/10 p-3 rounded text-neon-cyan group-hover:scale-110 transition"><i class="fas fa-wallet"></i></div>
+                <div><h3 class="font-bold text-white group-hover:text-neon-cyan transition">Financeiro</h3><p class="text-xs text-gray-500">Cobrança e Negociação</p></div>
             </a>
-             <a href="pages/pedagogico.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-pink flex items-center gap-4">
-                <div class="bg-neon-pink/10 p-3 rounded text-neon-pink"><i class="fas fa-brain"></i></div>
-                <div><h3 class="font-bold text-white">Pedagógico</h3><p class="text-xs text-gray-500">Agenda e Suporte</p></div>
+             <a href="pages/pedagogico.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-pink flex items-center gap-4 group">
+                <div class="bg-neon-pink/10 p-3 rounded text-neon-pink group-hover:scale-110 transition"><i class="fas fa-brain"></i></div>
+                <div><h3 class="font-bold text-white group-hover:text-neon-pink transition">Pedagógico</h3><p class="text-xs text-gray-500">Agenda e Suporte</p></div>
             </a>
-             <a href="pages/comercial.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-green flex items-center gap-4">
-                <div class="bg-neon-green/10 p-3 rounded text-neon-green"><i class="fas fa-rocket"></i></div>
-                <div><h3 class="font-bold text-white">Comercial</h3><p class="text-xs text-gray-500">CRM e Leads</p></div>
+             <a href="pages/comercial.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-green flex items-center gap-4 group">
+                <div class="bg-neon-green/10 p-3 rounded text-neon-green group-hover:scale-110 transition"><i class="fas fa-rocket"></i></div>
+                <div><h3 class="font-bold text-white group-hover:text-neon-green transition">Comercial</h3><p class="text-xs text-gray-500">CRM e Leads</p></div>
             </a>
-            <a href="pages/ferramentas.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-orange flex items-center gap-4 lg:col-span-2">
-                <div class="bg-neon-orange/10 p-3 rounded text-neon-orange"><i class="fas fa-tools"></i></div>
-                <div><h3 class="font-bold text-white">Ferramentas</h3><p class="text-xs text-gray-500">Conversão, Scripts e Suporte</p></div>
+            <a href="pages/ferramentas.html" class="glass-panel p-6 rounded-xl hover:bg-dark-800 transition border-l-4 border-l-neon-orange flex items-center gap-4 lg:col-span-2 group">
+                <div class="bg-neon-orange/10 p-3 rounded text-neon-orange group-hover:scale-110 transition"><i class="fas fa-tools"></i></div>
+                <div><h3 class="font-bold text-white group-hover:text-neon-orange transition">Ferramentas</h3><p class="text-xs text-gray-500">Conversão, Scripts e Suporte</p></div>
             </a>
         </div>
     </main>
@@ -134,46 +127,74 @@
     <script type="module" src="assets/js/main.js"></script>
     
     <script>
-        // --- MOTOR DE SINCRONIZAÇÃO (AUTO-SYNC) ---
+        // --- MOTOR DE SINCRONIZAÇÃO EM TEMPO REAL ---
         
         function refreshDashboardData() {
-            // 1. LEADS (Comercial) - Leitura direta do LocalStorage atualizado
-            const leadsData = localStorage.getItem('ODIN_CRM_LEADS');
-            const leads = leadsData ? JSON.parse(leadsData) : [];
-            document.getElementById('kpi-leads').innerText = leads.length;
+            try {
+                // 1. LEADS (Comercial)
+                const leadsData = localStorage.getItem('ODIN_CRM_LEADS');
+                const leads = leadsData ? JSON.parse(leadsData) : [];
+                updateElement('kpi-leads', leads.length);
 
-            // 2. PROTOCOLOS (Secretaria)
-            const reqsData = localStorage.getItem('ODIN_SECRETARIA_KANBAN');
-            const reqs = reqsData ? JSON.parse(reqsData) : [];
-            // Conta apenas pendentes (não finalizados)
-            const openReqs = reqs.filter(r => r.status !== 'done' && r.status !== 'rejected').length;
-            document.getElementById('kpi-reqs').innerText = openReqs;
+                // 2. PROTOCOLOS (Secretaria)
+                const reqsData = localStorage.getItem('ODIN_SECRETARIA_KANBAN');
+                const reqs = reqsData ? JSON.parse(reqsData) : [];
+                // Conta apenas os pendentes (em análise ou progresso)
+                const openReqs = reqs.filter(r => r.status !== 'done' && r.status !== 'rejected').length;
+                updateElement('kpi-reqs', openReqs);
 
-            // 3. FINANCEIRO (Pago)
-            const debtsData = localStorage.getItem('ODIN_DEBTS');
-            const debts = debtsData ? JSON.parse(debtsData) : [];
-            const totalRec = debts.reduce((acc, curr) => curr.status === 'pago' ? acc + curr.debt : acc, 0);
-            document.getElementById('kpi-finance').innerText = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRec);
+                // 3. FINANCEIRO (Valor Total Pago)
+                const debtsData = localStorage.getItem('ODIN_DEBTS');
+                const debts = debtsData ? JSON.parse(debtsData) : [];
+                const totalRec = debts.reduce((acc, curr) => curr.status === 'pago' ? acc + curr.debt : acc, 0);
+                const fmtFinance = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRec);
+                updateElement('kpi-finance', fmtFinance);
 
-            // 4. PEDAGÓGICO (Total Eventos/Aulas Agendadas)
-            const eventsData = localStorage.getItem('ODIN_PEDAGOGICO_AGENDA');
-            const events = eventsData ? JSON.parse(eventsData) : [];
-            document.getElementById('kpi-students').innerText = events.length;
+                // 4. PEDAGÓGICO (Total Eventos na Agenda)
+                const eventsData = localStorage.getItem('ODIN_PEDAGOGICO_AGENDA');
+                const events = eventsData ? JSON.parse(eventsData) : [];
+                updateElement('kpi-students', events.length);
+            } catch (e) {
+                console.error("Erro ao sincronizar dashboard:", e);
+            }
+        }
+
+        // Função auxiliar para atualizar apenas se mudou (evita flicker)
+        function updateElement(id, newValue) {
+            const el = document.getElementById(id);
+            if (el && el.innerText !== String(newValue)) {
+                el.innerText = newValue;
+                // Efeito visual de atualização (Flash)
+                el.classList.add('fade-update');
+                setTimeout(() => el.classList.remove('fade-update'), 500);
+            }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             // Relógio
-            setInterval(() => document.getElementById('quantum-clock').innerText = new Date().toLocaleTimeString('pt-BR',{hour12:false}), 1000);
+            setInterval(() => {
+                const el = document.getElementById('quantum-clock');
+                if(el) el.innerText = new Date().toLocaleTimeString('pt-BR',{hour12:false});
+            }, 1000);
             
             // Atualização Inicial
             refreshDashboardData();
+
+            // Loop de Verificação (Polling a cada 2s para garantir atualização mesmo sem foco)
+            setInterval(refreshDashboardData, 2000);
         });
 
-        // Sincronização Multi-Aba e Foco
-        // Se o usuário alterar algo em outra aba (ex: excluir lead no Comercial), 
-        // ao voltar para esta aba (focus) ou ao receber o evento de storage, atualiza.
-        window.addEventListener("focus", refreshDashboardData);
+        // Listeners de Eventos do Navegador (Reatividade Instantânea)
+        
+        // 'storage' dispara quando outra aba altera o localStorage
         window.addEventListener("storage", refreshDashboardData);
+        
+        // 'focus' dispara quando o usuário volta para esta aba
+        window.addEventListener("focus", refreshDashboardData);
+        
+        // 'pageshow' garante atualização ao usar botões Voltar/Avançar do navegador
+        window.addEventListener("pageshow", refreshDashboardData);
+        
     </script>
 </body>
 </html>

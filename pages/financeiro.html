@@ -3,61 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Financeiro | ODIN OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23', 600: '#2A2A35' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B' } }, animation: { 'marquee': 'marquee 25s linear infinite', }, keyframes: { marquee: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } } } } } }
     </script>
     <style>
-        .glass-panel {
-            background-color: rgba(14, 14, 18, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid #1A1A23;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.5);
-        }
-        .input-tech {
-            width: 100%;
-            background-color: #050507;
-            border: 1px solid #2A2A35;
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            color: #ffffff;
-            font-family: 'JetBrains Mono', monospace;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-        .input-tech:focus {
-            border-color: #00F0FF;
-            box-shadow: 0 0 10px rgba(0,240,255,0.2);
-        }
+        .glass-panel { background-color: rgba(14, 14, 18, 0.6); backdrop-filter: blur(12px); border: 1px solid #1A1A23; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
+        .input-tech { width: 100%; background-color: #050507; border: 1px solid #2A2A35; border-radius: 0.375rem; padding: 0.75rem; color: #ffffff; font-family: 'JetBrains Mono', monospace; outline: none; transition: all 0.2s ease; }
+        .input-tech:focus { border-color: #00F0FF; box-shadow: 0 0 10px rgba(0,240,255,0.2); }
         .input-tech::placeholder { color: #9CA3AF; }
-
         .tab-active-cyan { background-color: #00F0FF; color: #050507; box-shadow: 0 0 15px rgba(0,240,255,0.4); }
         .tab-active-violet { background-color: #7000FF; color: #ffffff; box-shadow: 0 0 15px rgba(112,0,255,0.4); }
         .tab-active-red { background-color: #FF003C; color: #ffffff; box-shadow: 0 0 15px rgba(255,0,60,0.4); }
         .tab-active-orange { background-color: #F59E0B; color: #050507; box-shadow: 0 0 15px rgba(245,158,11,0.4); }
-
         .tab-inactive { background-color: #050507; color: #9CA3AF; border: 1px solid #2A2A35; }
         .tab-inactive:hover { color: #ffffff; border-color: #9CA3AF; }
-
         input[type=range] { width: 100%; height: 0.5rem; background-color: #1A1A23; border-radius: 0.5rem; appearance: none; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb { appearance: none; width: 1.5rem; height: 1.5rem; background-color: #00F0FF; border-radius: 9999px; border: 4px solid #050507; box-shadow: 0 0 10px rgba(0,240,255,0.8); transition: transform 0.15s ease; }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
-
         body { background-color: #050507; color: #D1D5DB; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #050507; }
-        ::-webkit-scrollbar-thumb { background: #1A1A23; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
     <div id="header-placeholder"></div>
 
-    <div class="fixed top-24 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
+    <div class="fixed top-20 left-0 w-full h-8 bg-dark-800 border-b border-dark-700 flex items-center overflow-hidden z-40 pointer-events-none">
         <div class="whitespace-nowrap animate-marquee text-xs font-mono flex gap-12">
             <span class="text-gray-400">TOTAL HISTÓRICO: <span class="text-neon-green" id="ticker-historical">R$ 0,00</span></span>
             <span class="text-gray-400">HOJE: <span class="text-neon-cyan" id="ticker-today">R$ 0,00</span></span>
@@ -66,13 +44,13 @@
         </div>
     </div>
 
-    <main class="flex-grow pt-40 px-6 container mx-auto pb-20">
+    <main class="flex-grow pt-32 md:pt-40 px-4 md:px-6 container mx-auto pb-20">
         <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 border-b border-dark-700 pb-6">
             <div>
                 <div class="flex items-center gap-2 text-neon-cyan mb-2 font-mono text-xs tracking-widest uppercase">
                     <div class="w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div> Módulo Operacional
                 </div>
-                <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight">
+                <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight">
                     Financeiro <span class="text-dark-700">/</span> Odin
                 </h1>
             </div>
@@ -84,10 +62,10 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
             
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-6 order-2 lg:order-1">
                 <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-white font-bold flex items-center"><i class="fas fa-chart-bar text-neon-violet mr-2"></i> Histórico Diário</h3>
+                        <h3 class="text-white font-bold flex items-center"><i class="fas fa-chart-bar text-neon-violet mr-2"></i> Histórico</h3>
                         <span class="text-xs text-gray-500 font-mono" id="chart-date-range">Carregando...</span>
                     </div>
                     <div class="h-64 w-full">
@@ -102,23 +80,15 @@
                     </h4>
                     <input type="hidden" id="edit-index" value="-1">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                        <div class="md:col-span-5">
-                            <input type="text" id="input-name" placeholder="Nome do Cliente" class="input-tech">
-                        </div>
-                        <div class="md:col-span-3">
-                            <input type="text" id="input-value" placeholder="R$ 0,00" class="input-tech">
-                        </div>
+                        <div class="md:col-span-5"><input type="text" id="input-name" placeholder="Nome do Cliente" class="input-tech"></div>
+                        <div class="md:col-span-3"><input type="text" id="input-value" placeholder="R$ 0,00" class="input-tech"></div>
                         <div class="md:col-span-2">
                             <select id="input-status" class="input-tech cursor-pointer">
                                 <option value="pendente" class="text-red-400">Pendente</option>
                                 <option value="pago" class="text-green-400">Pago</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2">
-                            <button onclick="saveDebt()" id="btn-save" class="w-full h-full bg-neon-cyan text-dark-900 font-bold rounded hover:bg-white transition shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-                                <i class="fas fa-plus mr-1"></i> Add
-                            </button>
-                        </div>
+                        <div class="md:col-span-2"><button onclick="saveDebt()" id="btn-save" class="w-full h-full bg-neon-cyan text-dark-900 font-bold rounded hover:bg-white transition shadow-[0_0_10px_rgba(0,240,255,0.3)] py-3 md:py-0"><i class="fas fa-plus mr-1"></i> Add</button></div>
                     </div>
                 </div>
 
@@ -131,10 +101,10 @@
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-gray-500 uppercase bg-dark-800/50 border-b border-dark-700">
                                 <tr>
-                                    <th class="px-6 py-3">Cliente</th>
-                                    <th class="px-6 py-3">Valor</th>
-                                    <th class="px-6 py-3">Status</th>
-                                    <th class="px-6 py-3 text-right">Ações</th>
+                                    <th class="px-6 py-3 whitespace-nowrap">Cliente</th>
+                                    <th class="px-6 py-3 whitespace-nowrap">Valor</th>
+                                    <th class="px-6 py-3 whitespace-nowrap">Status</th>
+                                    <th class="px-6 py-3 text-right whitespace-nowrap">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="debtTableBody" class="divide-y divide-dark-700"></tbody>
@@ -147,8 +117,8 @@
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div id="sim-panel" class="glass-panel rounded-xl border-t-4 border-t-neon-cyan sticky top-36">
+            <div class="space-y-6 order-1 lg:order-2">
+                <div id="sim-panel" class="glass-panel rounded-xl border-t-4 border-t-neon-cyan lg:sticky lg:top-32 transition-all">
                     
                     <div class="grid grid-cols-4 p-2 gap-1 bg-dark-800/50 border-b border-dark-700">
                         <button onclick="switchTab('pix')" id="tab-pix" class="py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-active-cyan">PIX</button>
@@ -233,7 +203,6 @@
 
     <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
     <div id="footer-placeholder"></div>
-    <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="../assets/js/main.js"></script>
     
     <script>
@@ -242,21 +211,7 @@
         const LS_KEY_DEBTS = 'ODIN_DEBTS';
         const LS_KEY_CHART = 'ODIN_CHART_HISTORY';
 
-        // --- FATORES DE CARTÃO (Baseado na Planilha CSV) ---
-        const CARD_FACTORS = [
-            1.079822, // 1x
-            1.099644, // 2x
-            1.119466, // 3x
-            1.139288, // 4x
-            1.159110, // 5x
-            1.178932, // 6x
-            1.210063, // 7x
-            1.230072, // 8x
-            1.250081, // 9x
-            1.270090, // 10x
-            1.290099, // 11x
-            1.310108  // 12x
-        ];
+        const CARD_FACTORS = [1.079822, 1.099644, 1.119466, 1.139288, 1.159110, 1.178932, 1.210063, 1.230072, 1.250081, 1.270090, 1.290099, 1.310108];
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDataFromStorage(); checkNewDay(); initChart(); updateUI(); initCalculators();
@@ -270,245 +225,35 @@
             for(let i=1; i<=12; i++) { const opt = document.createElement('option'); opt.value = i; opt.text = `${i}x (Cartão)`; selectCard.appendChild(opt); }
         });
 
-        // --- PERSISTÊNCIA ---
-        function loadDataFromStorage() {
-            const d = localStorage.getItem(LS_KEY_DEBTS); if(d) debtsData = JSON.parse(d);
-            const h = localStorage.getItem(LS_KEY_CHART); if(h) chartHistory = JSON.parse(h); else chartHistory = [];
-        }
+        // --- FUNÇÕES DE CÁLCULO E LÓGICA (Mantidas do original) ---
+        function loadDataFromStorage() { const d = localStorage.getItem(LS_KEY_DEBTS); if(d) debtsData = JSON.parse(d); const h = localStorage.getItem(LS_KEY_CHART); if(h) chartHistory = JSON.parse(h); else chartHistory = []; }
         function getTodayString() { return new Date().toLocaleDateString('pt-BR'); }
-        function checkNewDay() {
-            const t = getTodayString();
-            if(chartHistory.length===0) chartHistory.push({date:t, value:0});
-            else if(chartHistory[chartHistory.length-1].date !== t) { chartHistory.push({date:t, value:0}); if(chartHistory.length>7) chartHistory.shift(); }
-            saveDataToStorage();
-        }
+        function checkNewDay() { const t = getTodayString(); if(chartHistory.length===0) chartHistory.push({date:t, value:0}); else if(chartHistory[chartHistory.length-1].date !== t) { chartHistory.push({date:t, value:0}); if(chartHistory.length>7) chartHistory.shift(); } saveDataToStorage(); }
         function saveDataToStorage() { localStorage.setItem(LS_KEY_DEBTS, JSON.stringify(debtsData)); localStorage.setItem(LS_KEY_CHART, JSON.stringify(chartHistory)); }
-
-        // --- CRUD ---
-        function saveDebt() {
-            const name = document.getElementById('input-name').value.trim();
-            const val = parseCurrency(document.getElementById('input-value').value);
-            const status = document.getElementById('input-status').value;
-            const idx = document.getElementById('edit-index').value;
-            if(!name || val<=0) { showToast('Erro nos dados', 'error'); return; }
-            const rec = {id:'#'+Math.floor(Math.random()*9000+1000), name, debt:val, status};
-            if(idx==="-1") { debtsData.push(rec); showToast('Salvo', 'success'); }
-            else { rec.id = debtsData[idx].id; debtsData[idx] = rec; showToast('Atualizado', 'success'); exitEditMode(); }
-            document.getElementById('input-name').value=''; document.getElementById('input-value').value=''; 
-            updateUI();
-        }
-        function editDebt(i) {
-            const r = debtsData[i];
-            document.getElementById('input-name').value = r.name;
-            document.getElementById('input-value').value = formatCurrency(r.debt);
-            document.getElementById('input-status').value = r.status;
-            document.getElementById('edit-index').value = i;
-            document.getElementById('edit-mode-indicator').classList.remove('hidden');
-            document.getElementById('btn-save').classList.replace('bg-neon-cyan','bg-neon-violet');
-        }
+        function saveDebt() { const name = document.getElementById('input-name').value.trim(); const val = parseCurrency(document.getElementById('input-value').value); const status = document.getElementById('input-status').value; const idx = document.getElementById('edit-index').value; if(!name || val<=0) { showToast('Erro nos dados', 'error'); return; } const rec = {id:'#'+Math.floor(Math.random()*9000+1000), name, debt:val, status}; if(idx==="-1") { debtsData.push(rec); showToast('Salvo', 'success'); } else { rec.id = debtsData[idx].id; debtsData[idx] = rec; showToast('Atualizado', 'success'); exitEditMode(); } document.getElementById('input-name').value=''; document.getElementById('input-value').value=''; updateUI(); }
+        function editDebt(i) { const r = debtsData[i]; document.getElementById('input-name').value = r.name; document.getElementById('input-value').value = formatCurrency(r.debt); document.getElementById('input-status').value = r.status; document.getElementById('edit-index').value = i; document.getElementById('edit-mode-indicator').classList.remove('hidden'); document.getElementById('btn-save').classList.replace('bg-neon-cyan','bg-neon-violet'); }
         function deleteDebt(i) { if(confirm('Apagar?')) { debtsData.splice(i,1); updateUI(); showToast('Apagado','info'); } }
-        function exitEditMode() {
-            document.getElementById('edit-index').value = "-1";
-            document.getElementById('edit-mode-indicator').classList.add('hidden');
-            document.getElementById('btn-save').classList.replace('bg-neon-violet','bg-neon-cyan');
-            document.getElementById('input-name').value=''; document.getElementById('input-value').value='';
-        }
+        function exitEditMode() { document.getElementById('edit-index').value = "-1"; document.getElementById('edit-mode-indicator').classList.add('hidden'); document.getElementById('btn-save').classList.replace('bg-neon-violet','bg-neon-cyan'); document.getElementById('input-name').value=''; document.getElementById('input-value').value=''; }
         function clearAllData() { if(confirm('Resetar tudo?')) { debtsData=[]; chartHistory=[{date:getTodayString(), value:0}]; updateUI(); showToast('Resetado','error'); } }
-
-        // --- UI ---
-        function updateUI() {
-            const tbody = document.getElementById('debtTableBody'); tbody.innerHTML = '';
-            let todayRec=0, pending=0;
-            if(debtsData.length===0) document.getElementById('empty-state').classList.remove('hidden');
-            else {
-                document.getElementById('empty-state').classList.add('hidden');
-                debtsData.forEach((r,i) => {
-                    if(r.status==='pago') todayRec+=r.debt; else pending+=r.debt;
-                    const style = r.status==='pago'?'text-neon-green border-neon-green/30 bg-neon-green/10':'text-neon-red border-neon-red/30 bg-neon-red/10';
-                    tbody.innerHTML += `<tr class="hover:bg-dark-700/50 border-b border-dark-700"><td class="px-6 py-4 font-bold text-white">${r.name}</td><td class="px-6 py-4 font-mono text-gray-300">${formatCurrency(r.debt)}</td><td class="px-6 py-4"><span class="text-xs font-bold px-2 py-1 rounded uppercase border ${style}">${r.status}</span></td><td class="px-6 py-4 text-right"><button onclick="loadToCalc(${r.debt})" class="mr-2 hover:text-neon-cyan"><i class="fas fa-calculator"></i></button><button onclick="editDebt(${i})" class="mr-2 hover:text-neon-violet"><i class="fas fa-pen"></i></button><button onclick="deleteDebt(${i})" class="hover:text-neon-red"><i class="fas fa-trash"></i></button></td></tr>`;
-                });
-            }
-            const todayIdx = chartHistory.findIndex(d=>d.date===getTodayString());
-            if(todayIdx!==-1) chartHistory[todayIdx].value = todayRec; else chartHistory.push({date:getTodayString(), value:todayRec});
-            saveDataToStorage();
-            document.getElementById('rowCount').innerText = debtsData.length + ' Reg';
-            document.getElementById('ticker-today').innerText = formatCurrency(todayRec);
-            document.getElementById('ticker-pending').innerText = formatCurrency(pending);
-            document.getElementById('ticker-historical').innerText = formatCurrency(chartHistory.reduce((a,b)=>a+b.value,0));
-            renderChart();
-        }
-
+        function updateUI() { const tbody = document.getElementById('debtTableBody'); tbody.innerHTML = ''; let todayRec=0, pending=0; if(debtsData.length===0) document.getElementById('empty-state').classList.remove('hidden'); else { document.getElementById('empty-state').classList.add('hidden'); debtsData.forEach((r,i) => { if(r.status==='pago') todayRec+=r.debt; else pending+=r.debt; const style = r.status==='pago'?'text-neon-green border-neon-green/30 bg-neon-green/10':'text-neon-red border-neon-red/30 bg-neon-red/10'; tbody.innerHTML += `<tr class="hover:bg-dark-700/50 border-b border-dark-700"><td class="px-6 py-4 font-bold text-white whitespace-nowrap">${r.name}</td><td class="px-6 py-4 font-mono text-gray-300 whitespace-nowrap">${formatCurrency(r.debt)}</td><td class="px-6 py-4 whitespace-nowrap"><span class="text-xs font-bold px-2 py-1 rounded uppercase border ${style}">${r.status}</span></td><td class="px-6 py-4 text-right whitespace-nowrap"><button onclick="loadToCalc(${r.debt})" class="mr-2 hover:text-neon-cyan"><i class="fas fa-calculator"></i></button><button onclick="editDebt(${i})" class="mr-2 hover:text-neon-violet"><i class="fas fa-pen"></i></button><button onclick="deleteDebt(${i})" class="hover:text-neon-red"><i class="fas fa-trash"></i></button></td></tr>`; }); } const todayIdx = chartHistory.findIndex(d=>d.date===getTodayString()); if(todayIdx!==-1) chartHistory[todayIdx].value = todayRec; else chartHistory.push({date:getTodayString(), value:todayRec}); saveDataToStorage(); document.getElementById('rowCount').innerText = debtsData.length + ' Reg'; document.getElementById('ticker-today').innerText = formatCurrency(todayRec); document.getElementById('ticker-pending').innerText = formatCurrency(pending); document.getElementById('ticker-historical').innerText = formatCurrency(chartHistory.reduce((a,b)=>a+b.value,0)); renderChart(); }
         let myChart;
-        function initChart() {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            const grad = ctx.createLinearGradient(0,0,0,400); grad.addColorStop(0,'rgba(0,255,148,0.8)'); grad.addColorStop(1,'rgba(0,255,148,0.1)');
-            myChart = new Chart(ctx, {
-                type: 'bar', data: {labels:[], datasets:[{label:'R$', data:[], backgroundColor:grad, borderColor:'#00FF94', borderWidth:1, borderRadius:4}]},
-                options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#6B7280'}}, y:{grid:{color:'#1A1A23'},ticks:{color:'#6B7280'}}}}
-            });
-        }
+        function initChart() { const ctx = document.getElementById('financeChart').getContext('2d'); const grad = ctx.createLinearGradient(0,0,0,400); grad.addColorStop(0,'rgba(0,255,148,0.8)'); grad.addColorStop(1,'rgba(0,255,148,0.1)'); myChart = new Chart(ctx, { type: 'bar', data: {labels:[], datasets:[{label:'R$', data:[], backgroundColor:grad, borderColor:'#00FF94', borderWidth:1, borderRadius:4}]}, options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#6B7280'}}, y:{grid:{color:'#1A1A23'},ticks:{color:'#6B7280'}}}} }); }
         function renderChart() { if(!myChart) return; myChart.data.labels = chartHistory.map(h=>h.date.slice(0,5)); myChart.data.datasets[0].data = chartHistory.map(h=>h.value); myChart.update(); if(chartHistory.length) document.getElementById('chart-date-range').innerText = `${chartHistory[0].date} - ${chartHistory[chartHistory.length-1].date}`; }
-
-        // --- SIMULADOR ---
-        function switchTab(t) {
-            ['pix','boleto','multa','cartao'].forEach(x => {
-                document.getElementById(`content-${x}`).classList.add('hidden');
-                document.getElementById(`tab-${x}`).className = 'py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive';
-            });
-            document.getElementById(`content-${t}`).classList.remove('hidden');
-            const panel = document.getElementById('sim-panel');
-            const colors = {pix:'neon-cyan', boleto:'neon-violet', multa:'neon-red', cartao:'neon-orange'};
-            document.getElementById(`tab-${t}`).className = `py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-active-${t==='cartao'?'orange':(t==='pix'?'cyan':(t==='boleto'?'violet':'red'))}`;
-            panel.className = `glass-panel rounded-xl border-t-4 border-t-${colors[t]} sticky top-36`;
-        }
-
-        function initCalculators() {
-            ['pix-total','boleto-total','multa-mensalidade','multa-adicional','card-total'].forEach(id => document.getElementById(id).addEventListener('input', ()=>{ 
-                if(id.includes('pix')) calcPix(); 
-                if(id.includes('boleto')) calcBoleto(); 
-                if(id.includes('multa')) calcMulta(); 
-                if(id.includes('card')) calcCard(); 
-            }));
-            document.getElementById('pix-slider').addEventListener('input', calcPix);
-            document.getElementById('boleto-parcelas').addEventListener('change', calcBoleto);
-            document.getElementById('card-installments').addEventListener('change', calcCard);
-        }
-
-        // --- CÁLCULOS ---
-        function calcPix() {
-            const t = parseCurrency(document.getElementById('pix-total').value);
-            const p = document.getElementById('pix-slider').value;
-            document.getElementById('pix-percent-display').innerText = `${p}%`;
-            if(t>0) {
-                const f = t * (1 - p/100);
-                document.getElementById('pix-val-final').innerText = formatCurrency(f);
-                document.getElementById('pix-val-original-hidden').innerText = formatCurrency(t); 
-                document.getElementById('pix-result').classList.remove('hidden');
-            } else document.getElementById('pix-result').classList.add('hidden');
-        }
-
-        function calcBoleto() {
-            const t = parseCurrency(document.getElementById('boleto-total').value);
-            const p = parseInt(document.getElementById('boleto-parcelas').value);
-            if(t>0) {
-                const ep = p<=6 ? 0.30 : 0.25;
-                document.getElementById('boleto-val-entrada').innerText = formatCurrency(t*ep);
-                document.getElementById('boleto-qtd-parcelas').innerText = `${p}x`;
-                document.getElementById('boleto-val-parcela').innerText = formatCurrency((t - (t*ep))/p);
-                document.getElementById('boleto-result').classList.remove('hidden');
-            } else document.getElementById('boleto-result').classList.add('hidden');
-        }
-
-        function calcMulta() {
-            const m = parseCurrency(document.getElementById('multa-mensalidade').value);
-            const a = parseCurrency(document.getElementById('multa-adicional').value);
-            if(m>0) {
-                const s = m*6; const mu = s*0.10;
-                document.getElementById('multa-base').innerText = formatCurrency(s);
-                document.getElementById('multa-valor').innerText = formatCurrency(mu);
-                document.getElementById('multa-extra').innerText = formatCurrency(a);
-                document.getElementById('multa-total').innerText = formatCurrency(mu+a);
-                document.getElementById('multa-result').classList.remove('hidden');
-            } else document.getElementById('multa-result').classList.add('hidden');
-        }
-
-        function calcCard() {
-            const valReceber = parseCurrency(document.getElementById('card-total').value);
-            const parcelas = parseInt(document.getElementById('card-installments').value);
-            
-            if (valReceber > 0 && parcelas > 0) {
-                const fator = CARD_FACTORS[parcelas - 1];
-                const total = valReceber * fator;
-                const parc = total / parcelas;
-
-                document.getElementById('card-display-installments').innerText = `${parcelas}x`;
-                document.getElementById('card-display-parcela').innerText = formatCurrency(parc);
-                document.getElementById('card-display-total').innerText = formatCurrency(total);
-                document.getElementById('card-result').classList.remove('hidden');
-            } else {
-                document.getElementById('card-result').classList.add('hidden');
-            }
-        }
-
-        // --- CÓPIA (TEXTOS EXATOS) ---
-        function copyPixProposal() {
-            const totalText = document.getElementById('pix-val-original-hidden').innerText || formatCurrency(parseCurrency(document.getElementById('pix-total').value));
-            const finalText = document.getElementById('pix-val-final').innerText;
-            const percentText = document.getElementById('pix-percent-display').innerText;
-            const texto = `💰 *PROPOSTA ESPECIAL PARA PAGAMENTO À VISTA!*\n\nValor original: ~${totalText}~\n*Valor com ${percentText} de desconto: ${finalText}* ✨\n\nEsta condição é válida para pagamento via PIX ou cartão de crédito, sendo que, pagando com cartão, incidirão as taxas correspondentes.`;
-            navigator.clipboard.writeText(texto).then(() => showToast('Proposta PIX Copiada!', 'success'));
-        }
-
-        function copyBoletoProposal() {
-            const entrada = document.getElementById('boleto-val-entrada').innerText;
-            const parcelas = document.getElementById('boleto-qtd-parcelas').innerText;
-            const valorParc = document.getElementById('boleto-val-parcela').innerText;
-            const texto = `🧾 *ORÇAMENTO PARA PARCELAMENTO NO BOLETO*\n\n*Valor da Entrada:* ${entrada}\n*Restante em ${parcelas} de:* ${valorParc}\n\nPosso gerar os boletos para pagamento hoje?`;
-            navigator.clipboard.writeText(texto).then(() => showToast('Orçamento Boleto Copiado!', 'success'));
-        }
-
-        function copyMultaProposal() {
-            const sem = document.getElementById('multa-base').innerText;
-            const mul = document.getElementById('multa-valor').innerText;
-            const add = document.getElementById('multa-extra').innerText;
-            const tot = document.getElementById('multa-total').innerText;
-            const texto = `*Detalhamento - Multa Contratual e Débitos*\n\n📊 Valor Base Semestral (6x Mensalidade): ${sem}\n⚖️ Multa Contratual (10% do Semestre): ${mul}\n🗓️ Valores Adicionais em Atraso: ${add}\n-----------------------------------\n💰 *TOTAL A PAGAR:* ${tot}\n\nEste cálculo considera a multa contratual padrão e os valores em atraso informados. Caso tenha alguma dúvida estamos à disposição.`;
-            navigator.clipboard.writeText(texto).then(() => showToast('Rescisão Copiada!', 'success'));
-        }
-
-        function copyCardProposal() {
-            const valParcela = document.getElementById('card-display-parcela').innerText;
-            const valTotal = document.getElementById('card-display-total').innerText;
-            const qtd = document.getElementById('card-display-installments').innerText;
-            
-            if (valParcela === 'R$ 0,00') return showToast('Preencha os valores', 'error');
-
-            const texto = `💳 *SIMULAÇÃO CARTÃO DE CRÉDITO*\n\n*Condição Selecionada:*\n${qtd} de ${valParcela}\n\n*Valor Total:* ${valTotal}\n\nPodemos enviar o link de pagamento?`;
-            
-            navigator.clipboard.writeText(texto).then(() => showToast('Proposta Cartão Copiada!', 'success'));
-        }
-
-        // Helpers
+        function switchTab(t) { ['pix','boleto','multa','cartao'].forEach(x => { document.getElementById(`content-${x}`).classList.add('hidden'); document.getElementById(`tab-${x}`).className = 'py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-inactive'; }); document.getElementById(`content-${t}`).classList.remove('hidden'); const panel = document.getElementById('sim-panel'); const colors = {pix:'neon-cyan', boleto:'neon-violet', multa:'neon-red', cartao:'neon-orange'}; document.getElementById(`tab-${t}`).className = `py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all tab-active-${t==='cartao'?'orange':(t==='pix'?'cyan':(t==='boleto'?'violet':'red'))}`; panel.className = `glass-panel rounded-xl border-t-4 border-t-${colors[t]} lg:sticky lg:top-32 transition-all`; }
+        function initCalculators() { ['pix-total','boleto-total','multa-mensalidade','multa-adicional','card-total'].forEach(id => document.getElementById(id).addEventListener('input', ()=>{ if(id.includes('pix')) calcPix(); if(id.includes('boleto')) calcBoleto(); if(id.includes('multa')) calcMulta(); if(id.includes('card')) calcCard(); })); document.getElementById('pix-slider').addEventListener('input', calcPix); document.getElementById('boleto-parcelas').addEventListener('change', calcBoleto); document.getElementById('card-installments').addEventListener('change', calcCard); }
+        function calcPix() { const t = parseCurrency(document.getElementById('pix-total').value); const p = document.getElementById('pix-slider').value; document.getElementById('pix-percent-display').innerText = `${p}%`; if(t>0) { const f = t * (1 - p/100); document.getElementById('pix-val-final').innerText = formatCurrency(f); document.getElementById('pix-val-original-hidden').innerText = formatCurrency(t); document.getElementById('pix-result').classList.remove('hidden'); } else document.getElementById('pix-result').classList.add('hidden'); }
+        function calcBoleto() { const t = parseCurrency(document.getElementById('boleto-total').value); const p = parseInt(document.getElementById('boleto-parcelas').value); if(t>0) { const ep = p<=6 ? 0.30 : 0.25; document.getElementById('boleto-val-entrada').innerText = formatCurrency(t*ep); document.getElementById('boleto-qtd-parcelas').innerText = `${p}x`; document.getElementById('boleto-val-parcela').innerText = formatCurrency((t - (t*ep))/p); document.getElementById('boleto-result').classList.remove('hidden'); } else document.getElementById('boleto-result').classList.add('hidden'); }
+        function calcMulta() { const m = parseCurrency(document.getElementById('multa-mensalidade').value); const a = parseCurrency(document.getElementById('multa-adicional').value); if(m>0) { const s = m*6; const mu = s*0.10; document.getElementById('multa-base').innerText = formatCurrency(s); document.getElementById('multa-valor').innerText = formatCurrency(mu); document.getElementById('multa-extra').innerText = formatCurrency(a); document.getElementById('multa-total').innerText = formatCurrency(mu+a); document.getElementById('multa-result').classList.remove('hidden'); } else document.getElementById('multa-result').classList.add('hidden'); }
+        function calcCard() { const valReceber = parseCurrency(document.getElementById('card-total').value); const parcelas = parseInt(document.getElementById('card-installments').value); if (valReceber > 0 && parcelas > 0) { const fator = CARD_FACTORS[parcelas - 1]; const total = valReceber * fator; const parc = total / parcelas; document.getElementById('card-display-installments').innerText = `${parcelas}x`; document.getElementById('card-display-parcela').innerText = formatCurrency(parc); document.getElementById('card-display-total').innerText = formatCurrency(total); document.getElementById('card-result').classList.remove('hidden'); } else { document.getElementById('card-result').classList.add('hidden'); } }
+        function copyPixProposal() { const totalText = document.getElementById('pix-val-original-hidden').innerText || formatCurrency(parseCurrency(document.getElementById('pix-total').value)); const finalText = document.getElementById('pix-val-final').innerText; const percentText = document.getElementById('pix-percent-display').innerText; const texto = `💰 *PROPOSTA ESPECIAL PARA PAGAMENTO À VISTA!*\n\nValor original: ~${totalText}~\n*Valor com ${percentText} de desconto: ${finalText}* ✨\n\nEsta condição é válida para pagamento via PIX ou cartão de crédito, sendo que, pagando com cartão, incidirão as taxas correspondentes.`; navigator.clipboard.writeText(texto).then(() => showToast('Proposta PIX Copiada!', 'success')); }
+        function copyBoletoProposal() { const entrada = document.getElementById('boleto-val-entrada').innerText; const parcelas = document.getElementById('boleto-qtd-parcelas').innerText; const valorParc = document.getElementById('boleto-val-parcela').innerText; const texto = `🧾 *ORÇAMENTO PARA PARCELAMENTO NO BOLETO*\n\n*Valor da Entrada:* ${entrada}\n*Restante em ${parcelas} de:* ${valorParc}\n\nPosso gerar os boletos para pagamento hoje?`; navigator.clipboard.writeText(texto).then(() => showToast('Orçamento Boleto Copiado!', 'success')); }
+        function copyMultaProposal() { const sem = document.getElementById('multa-base').innerText; const mul = document.getElementById('multa-valor').innerText; const add = document.getElementById('multa-extra').innerText; const tot = document.getElementById('multa-total').innerText; const texto = `*Detalhamento - Multa Contratual e Débitos*\n\n📊 Valor Base Semestral (6x Mensalidade): ${sem}\n⚖️ Multa Contratual (10% do Semestre): ${mul}\n🗓️ Valores Adicionais em Atraso: ${add}\n-----------------------------------\n💰 *TOTAL A PAGAR:* ${tot}\n\nEste cálculo considera a multa contratual padrão e os valores em atraso informados. Caso tenha alguma dúvida estamos à disposição.`; navigator.clipboard.writeText(texto).then(() => showToast('Rescisão Copiada!', 'success')); }
+        function copyCardProposal() { const valParcela = document.getElementById('card-display-parcela').innerText; const valTotal = document.getElementById('card-display-total').innerText; const qtd = document.getElementById('card-display-installments').innerText; if (valParcela === 'R$ 0,00') return showToast('Preencha os valores', 'error'); const texto = `💳 *SIMULAÇÃO CARTÃO DE CRÉDITO*\n\n*Condição Selecionada:*\n${qtd} de ${valParcela}\n\n*Valor Total:* ${valTotal}\n\nPodemos enviar o link de pagamento?`; navigator.clipboard.writeText(texto).then(() => showToast('Proposta Cartão Copiada!', 'success')); }
         function addCurrencyMask(i) { i.addEventListener('input', (e)=>{ let v = e.target.value.replace(/\D/g,''); if(v){v=(parseInt(v,10)/100).toFixed(2);e.target.value=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);}else e.target.value=''; }); }
         function parseCurrency(v) { if(!v)return 0; return parseFloat(v.replace(/\D/g,''))/100 || 0; }
         function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
         function loadToCalc(v) { switchTab('pix'); const fs=v.toFixed(2); const f=`R$ ${new Intl.NumberFormat('pt-BR').format(fs)}`; document.getElementById('pix-total').value=f; document.getElementById('boleto-total').value=f; document.getElementById('card-total').value=f; calcPix(); showToast('Carregado', 'info'); }
         function showToast(msg,type='info'){const t=document.createElement('div'); const c=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-cyan text-neon-cyan'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${c} text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transform translate-x-full transition-all duration-300 min-w-[200px]`; t.innerHTML=`<i class="fas ${type==='success'?'fa-check':'fa-info'}"></i><span class="text-sm font-bold">${msg}</span>`; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.classList.remove('translate-x-full'),10); setTimeout(()=>{t.classList.add('translate-x-full','opacity-0');setTimeout(()=>t.remove(),300)},3000); }
     </script>
-
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Verifica se há um comando de voz pendente vindo do main.js
-        const voiceParams = localStorage.getItem('ODIN_VOICE_PARAMS');
-        
-        if (voiceParams) {
-            const params = JSON.parse(voiceParams);
-            
-            if (params.type === 'calc_pix') {
-                // Preenche os campos
-                switchTab('pix');
-                
-                // Formata para Real (Ex: 5000 -> R$ 5.000,00)
-                const valFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(params.value);
-                document.getElementById('pix-total').value = valFormatted;
-                
-                document.getElementById('pix-slider').value = params.discount;
-                
-                // Executa o cálculo
-                calcPix();
-                
-                // Feedback de Áudio
-                const result = document.getElementById('pix-val-final').innerText;
-                // Pequeno delay para garantir que a voz do navegador carregou
-                setTimeout(() => {
-                    if(window.speak) window.speak(`Cálculo realizado. O valor final com desconto é ${result}.`);
-                }, 1000);
-                
-                // Limpa o comando para não repetir ao recarregar
-                localStorage.removeItem('ODIN_VOICE_PARAMS');
-            }
-        }
-    });
-</script>
 </body>
 </html>
