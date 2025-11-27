@@ -1,9 +1,29 @@
-<main class="flex-grow pt-32 pb-20 px-6">
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificação | ODIN OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{dark:{900:'#050507',800:'#0E0E12',700:'#1A1A23'},neon:{blue:'#3B82F6'}}}}} </script>
+    <style>
+        .tech-border { border: 1px solid #374151; }
+    </style>
+</head>
+<body class="bg-dark-900 text-gray-300 flex flex-col min-h-screen">
+
+    <div id="header-placeholder"></div>
+
+    <main class="flex-grow pt-32 pb-20 px-6">
         <div class="container mx-auto max-w-4xl">
             <div class="text-sm text-gray-500 mb-8 flex items-center uppercase tracking-wider font-semibold">
                 <a href="../index.html" class="hover:text-neon-blue transition">Home</a> <span class="mx-3">/</span> <span class="text-neon-blue">Certificação</span>
             </div>
-            
+
             <div class="text-center mb-12">
                 <i class="fas fa-award text-6xl text-neon-blue mb-6"></i>
                 <h1 class="text-4xl font-black text-white mb-4">Diplomas e Certificados</h1>
@@ -19,3 +39,9 @@
             </div>
         </div>
     </main>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
+    <div id="footer-placeholder"></div>
+    <script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

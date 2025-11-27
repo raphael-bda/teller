@@ -509,5 +509,7 @@
 
         function showToast(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); const cl=type==='success'?'border-neon-green text-neon-green':(type==='error'?'border-neon-red text-neon-red':'border-neon-orange text-neon-orange'); t.className=`pointer-events-auto bg-dark-800/95 backdrop-blur border-l-4 ${cl} text-white px-4 py-3 rounded shadow-lg animate-[fadeIn_0.3s]`; t.innerHTML=`<span class="font-bold text-sm">${msg}</span>`; c.appendChild(t); setTimeout(()=>{t.remove()},3000); }
     </script>
+
+    
 </body>
 </html>
