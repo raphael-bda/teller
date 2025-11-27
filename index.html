@@ -4,18 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ODIN | Central Command</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, colors: { dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23' }, neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } }, backgroundImage: { 'grid-pattern': "linear-gradient(to right, #1A1A23 1px, transparent 1px), linear-gradient(to bottom, #1A1A23 1px, transparent 1px)", } } } }
+        tailwind.config = { 
+            darkMode: 'class', 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], }, 
+                    colors: { 
+                        dark: { 900: '#050507', 800: '#0E0E12', 700: '#1A1A23' }, 
+                        neon: { cyan: '#00F0FF', violet: '#7000FF', green: '#00FF94', red: '#FF003C', orange: '#F59E0B', pink: '#FF0080' } 
+                    }, 
+                    backgroundImage: { 
+                        'grid-pattern': "linear-gradient(to right, #1A1A23 1px, transparent 1px), linear-gradient(to bottom, #1A1A23 1px, transparent 1px)", 
+                    } 
+                } 
+            } 
+        }
     </script>
     <style>
         .glass-panel {
@@ -127,8 +141,6 @@
     <script type="module" src="assets/js/main.js"></script>
     
     <script>
-        // --- MOTOR DE SINCRONIZAÇÃO EM TEMPO REAL ---
-        
         function refreshDashboardData() {
             try {
                 // 1. LEADS (Comercial)
@@ -139,7 +151,6 @@
                 // 2. PROTOCOLOS (Secretaria)
                 const reqsData = localStorage.getItem('ODIN_SECRETARIA_KANBAN');
                 const reqs = reqsData ? JSON.parse(reqsData) : [];
-                // Conta apenas os pendentes (em análise ou progresso)
                 const openReqs = reqs.filter(r => r.status !== 'done' && r.status !== 'rejected').length;
                 updateElement('kpi-reqs', openReqs);
 
@@ -164,7 +175,6 @@
             const el = document.getElementById(id);
             if (el && el.innerText !== String(newValue)) {
                 el.innerText = newValue;
-                // Efeito visual de atualização (Flash)
                 el.classList.add('fade-update');
                 setTimeout(() => el.classList.remove('fade-update'), 500);
             }
@@ -180,21 +190,14 @@
             // Atualização Inicial
             refreshDashboardData();
 
-            // Loop de Verificação (Polling a cada 2s para garantir atualização mesmo sem foco)
+            // Loop de Verificação (Polling)
             setInterval(refreshDashboardData, 2000);
         });
 
-        // Listeners de Eventos do Navegador (Reatividade Instantânea)
-        
-        // 'storage' dispara quando outra aba altera o localStorage
+        // Listeners para Reatividade Instantânea
         window.addEventListener("storage", refreshDashboardData);
-        
-        // 'focus' dispara quando o usuário volta para esta aba
         window.addEventListener("focus", refreshDashboardData);
-        
-        // 'pageshow' garante atualização ao usar botões Voltar/Avançar do navegador
         window.addEventListener("pageshow", refreshDashboardData);
-        
     </script>
 </body>
 </html>
